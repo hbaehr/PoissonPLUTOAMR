@@ -61,12 +61,12 @@ static void enableFpExceptions();
     
 // Define a host of PoissonOps for all necessary levels
 void AMRPoissonOpFactory::define(a_coarseDomain   // domain at the coarsest level
-                            a_grids               // AMR heirarchy
-                            a_refRatios           // refinement ratios between levels
-                            a_coarsedx            // grid spacing at the coarsest level
-                            a_bc                  // boundary conditions
-                            a_alpha=0.0           // identity coefficient = 0
-                            a_beta=1.0            // Lapacian coefficient = 1/(4*pi*G)
+                                 a_grids          // AMR heirarchy
+                                 a_refRatios      // refinement ratios between levels
+                                 a_coarsedx       // grid spacing at the coarsest level
+                                 a_bc             // boundary conditions
+                                 a_alpha=0.0      // identity coefficient = 0
+                                 a_beta=1.0       // Lapacian coefficient = 1/(4*pi*G)
                             );
 
 //
