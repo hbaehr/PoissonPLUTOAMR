@@ -49,10 +49,6 @@ static void enableFpExceptions();
 
 /* List of things which need to happen
  *
- * Read in grid/mesh structure
- *  - Identify areas with certain levels of refinement
- *  - Communication across level boundaries?
- * Read in grid/mesh data
  * Calculate self-gravitational potential
  * Calculate aceleration due to self-gravity
  * Export calculations to main part of PLUTO
@@ -60,34 +56,40 @@ static void enableFpExceptions();
  * 
  *
  */
-
-// Read in grid/mesh structure
-    
-    // How to calculate for different AMR Levels? Start with calculation on most refined level
-    // and then move to the next level while excluding all higher levels
-    
-// Read in grid/mesh data
-    
-    // Primitive variables from the input conservative array
-
     
 // Use CHOMBO functions to solve for the self-gravitational potential
     
-AMRPoissonOpFactory::define(a_coarseDomain   // domain at the coarsest level
-                            a_grids          // AMR heirarchy
-                            a_refRatios      // refinement ratios between levels
-                            a_coarsedx       // grid spacing at the coarsest level
-                            a_bc             // boundary conditions
-                            a_alpha=1.0      // identity coefficient = 4*pi*G
-                            a_beta=1.0       // Lapacian coefficient
+// Define a host of PoissonOps for all necessary levels
+void AMRPoissonOpFactory::define(a_coarseDomain   // domain at the coarsest level
+                            a_grids               // AMR heirarchy
+                            a_refRatios           // refinement ratios between levels
+                            a_coarsedx            // grid spacing at the coarsest level
+                            a_bc                  // boundary conditions
+                            a_alpha=0.0           // identity coefficient = 0
+                            a_beta=1.0            // Lapacian coefficient = 1/(4*pi*G)
                             );
-        
-// Calculate physics of self-gravity grad(phi) = g
 
- // Find the gradient operator in the Chombo library
+//
+void AMRPoissonOp::(
+                    );
 
-// Export calculations to the main part of PLUTO
+//
+virtual void AMRPoissonOp::applyOp(
+                                   );
+
+// Getting an accurate value
+virtual void AMRPoissonOp::residual(LevelData<FArrayBox>&  	a_lhs,
+                                    const LevelData<FArrayBox>&  a_phi,
+                                    const LevelData<FArrayBox>&  a_rhs,
+                                    bool  a_homogeneous = false 
+                                    ); 
+
+// Calculate physics of self-gravity grad(phi) = g (Do this here or in the main PLUTO code?)
+// It might be useful to do it here because Chombo should have no issues doing the gradient 
+// over grid refinement levels
+
+// Export calculations to the main part of PLUTO (phi and grad(phi)?)
  
- // 
+// Fluxes?
 
 // Clean up and close up shop
