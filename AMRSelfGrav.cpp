@@ -33,6 +33,7 @@ using std::ios;
 
 #include "AMR.H"
 #include "AMRLevelPlutoFactory.H"
+#include "AMRPoissonOp.H"
 
 #include "UsingNamespace.H"
 
@@ -62,12 +63,31 @@ static void enableFpExceptions();
 
 // Read in grid/mesh structure
     
+    // How to calculate for different AMR Levels? Start with calculation on most refined level
+    // and then move to the next level while excluding all higher levels
+    
 // Read in grid/mesh data
+    
+    // Primitive variables from the input conservative array
+
     
 // Use CHOMBO functions to solve for the self-gravitational potential
     
+AMRPoissonOpFactory::define(a_coarseDomain   // domain at the coarsest level
+                            a_grids          // AMR heirarchy
+                            a_refRatios      // refinement ratios between levels
+                            a_coarsedx       // grid spacing at the coarsest level
+                            a_bc             // boundary conditions
+                            a_alpha=1.0      // identity coefficient = 4*pi*G
+                            a_beta=1.0       // Lapacian coefficient
+                            );
+        
 // Calculate physics of self-gravity grad(phi) = g
 
+ // Find the gradient operator in the Chombo library
+
 // Export calculations to the main part of PLUTO
-    
+ 
+ // 
+
 // Clean up and close up shop
