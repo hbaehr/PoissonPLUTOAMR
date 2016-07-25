@@ -46,3 +46,28 @@ using std::ios;
 static void enableFpExceptions();
 #endif
 
+/* List of things which need to happen
+ *
+ * Read in grid/mesh structure
+ *  - Identify areas with certain levels of refinement
+ *  - Communication across level boundaries?
+ * Read in grid/mesh data
+ * Calculate self-gravitational potential
+ * Calculate aceleration due to self-gravity
+ * Export calculations to main part of PLUTO
+ *  - Store calculations somewhere (temporarily)?
+ * 
+ *
+ */
+
+// Read in grid/mesh structure
+    
+// Read in grid/mesh data
+    
+// Use CHOMBO functions to solve for the self-gravitational potential
+    
+// Calculate physics of self-gravity grad(phi) = g
+
+// Export calculations to the main part of PLUTO
+    
+// Clean up and close up shop
