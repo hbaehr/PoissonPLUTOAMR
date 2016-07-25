@@ -78,11 +78,62 @@ virtual void AMRPoissonOp::applyOp(
                                    );
 
 // Getting an accurate value
-virtual void AMRPoissonOp::residual(LevelData<FArrayBox>&  	a_lhs,
-                                    const LevelData<FArrayBox>&  a_phi,
-                                    const LevelData<FArrayBox>&  a_rhs,
-                                    bool  a_homogeneous = false 
-                                    ); 
+virtual void AMRPoissonOp::residual(LevelData<FArrayBox>&  	a_lhs,      // left-hand side
+                                    const LevelData<FArrayBox>&  a_phi, // self-gravitational potential
+                                    const LevelData<FArrayBox>&  a_rhs, // right-hand side (rho)
+                                    bool  a_homogeneous = false         // 
+                                    );
+
+// Example from the documentation
+
+/*
+ * solveElliptic solves (alpha I + beta Laplacian) phi = rhs
+ * using AMRMultiGrid and AMRPoissonOp
+ * Inputs:
+ * rhs: Right-hand side of the solve over the level.
+ * grids: AMRHierarchy of grids
+ * refRatio: refinement ratios
+ * level0Domain: domain at the coarsest AMR level
+ * coarsestDx: grid spacing at the coarsest level
+ * alpha: identity coefficient
+ * beta: Laplacian coefficient
+ * Outputs:
+ * phi = (alpha I + beta Lapl)^{-1}(rhs)
+ */
+
+void solveElliptic(Vector<LevelData<FArrayBox>* >& phi,
+                   const Vector<LevelData<FArrayBox>* > rhs,
+                   const Vector<DisjointBoxLayout>& grids,
+                   const Vector<int>& refRatios,
+                   const ProblemDomain& level0Domain,
+                   Real alpha, Real beta, Real coarsestDx)
+{
+int numlevels = rhs.size();
+
+//define the operator factory
+AMRPoissonOpFactory opFactory;
+opFactory.define(level0Domain,
+                 grids, refRatios, coarsestDx,
+                 &ParseBC, alpha, beta);
+
+//this is the solver we shall use
+AMRMultiGrid<LevelData<FArrayBox> > solver;
+
+//this is the solver for the bottom of the muligrid v-cycle
+BiCGStabSolver<LevelData<FArrayBox> > bottomSolver;
+
+//bicgstab can be noisy
+bottomSolver.m_verbosity = 0;
+
+//define the solver
+solver.define(level0Domain, opFactory, &bottomSolver, numlevels);
+
+//we want to solve over the whole hierarchy
+int lbase = 0;
+
+//so solve already.
+solver.solve(phi, rhs, numlevels-1, lbase);
+}
 
 // Calculate physics of self-gravity grad(phi) = g (Do this here or in the main PLUTO code?)
 // It might be useful to do it here because Chombo should have no issues doing the gradient 
