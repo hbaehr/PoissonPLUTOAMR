@@ -47,30 +47,31 @@ using std::ios;
 #ifdef TRAP_FPE
 static void enableFpExceptions();
 #endif
-    
-// Example from the Chombo documentation
 
-/*
- * solveElliptic solves (alpha I + beta Laplacian) phi = rhs
- * using AMRMultiGrid and AMRPoissonOp
- * Inputs:
- * rhs: Right-hand side of the solve over the level.
- * grids: AMRHierarchy of grids
- * refRatio: refinement ratios
- * level0Domain: domain at the coarsest AMR level
- * coarsestDx: grid spacing at the coarsest level
- * alpha: identity coefficient
- * beta: Laplacian coefficient
- * Outputs:
- * phi = (alpha I + beta Lapl)^{-1}(rhs)
- */
-
-void solveElliptic(Vector<LevelData<FArrayBox>* >& phi,         // Output self-gravity potential
-                   const Vector<LevelData<FArrayBox>* > rhs,    // Input density 
-                   const Vector<DisjointBoxLayout>& grids,      // Grid geometries
+/* ********************************************************** */
+void solveElliptic(Vector<LevelData<FArrayBox>* >& phi,         // Output self-gravity potential: m_gravpot
+                   const Vector<LevelData<FArrayBox>* > rhs,    // Input density: m_UNew
+                   const Vector<DisjointBoxLayout>& grids,      // Grid geometries: m_ref_ratio
                    const Vector<int>& refRatios,                // Vector defining refinement ratios between levels
                    const ProblemDomain& level0Domain,           // 
                    Real alpha, Real beta, Real coarsestDx)      // constants alpha=0, beta=1/(4*pi*G)
+/*
+ * Example from the Chombo documentation:
+ *
+ * solveElliptic solves (alpha I + beta Laplacian) phi = rhs
+ * using AMRMultiGrid and AMRPoissonOp
+ * Inputs:
+ *  rhs: Right-hand side of the solve over the level.
+ *  grids: AMRHierarchy of grids
+ *  refRatio: refinement ratios
+ *  level0Domain: domain at the coarsest AMR level
+ *  coarsestDx: grid spacing at the coarsest level
+ *  alpha: identity coefficient
+ *  beta: Laplacian coefficient
+ * Outputs:
+ *  phi = (alpha I + beta Lapl)^{-1}(rhs)
+ *
+ ************************************************************ */
 {
 int numlevels = rhs.size(); // A different array for each refinement level
 
@@ -80,10 +81,10 @@ opFactory.define(level0Domain,
                  grids, refRatios, coarsestDx,
                  &ParseBC, alpha, beta);
 
-//this is the solver we shall use
+//this is the solver we shall use (From where does this come?)
 AMRMultiGrid<LevelData<FArrayBox> > solver;
 
-//this is the solver for the bottom of the muligrid v-cycle
+//this is the solver for the bottom of the muligrid v-cycle (???)
 BiCGStabSolver<LevelData<FArrayBox> > bottomSolver;
 
 //bicgstab can be noisy
