@@ -49,16 +49,16 @@ static void enableFpExceptions();
 #endif
 
 /* ********************************************************** */
-void solveElliptic(Vector<LevelData<FArrayBox>* >& phi,         // Output self-gravity potential: m_gravpot
-                   const Vector<LevelData<FArrayBox>* > rhs,    // Input density: m_UNew
-                   const Vector<DisjointBoxLayout>& grids,      // Grid geometries: m_ref_ratio
-                   const Vector<int>& refRatios,                // Vector defining refinement ratios between levels
-                   const ProblemDomain& level0Domain,           // 
-                   Real alpha, Real beta, Real coarsestDx)      // constants alpha=0, beta=1/(4*pi*G)
+void solveSelfGravPot(Vector<LevelData<FArrayBox>* >& phi,         // Output self-gravity potential: m_gravpot
+                      const Vector<LevelData<FArrayBox>* > rhs,    // Input density: m_UNew
+                      const Vector<DisjointBoxLayout>& grids,      // Grid geometries: m_ref_ratio
+                      const Vector<int>& refRatios,                // Vector defining refinement ratios between levels
+                      const ProblemDomain& level0Domain,           // 
+                      Real alpha, Real beta, Real coarsestDx)      // constants alpha=0, beta=1/(4*pi*G)
 /*
  * Example from the Chombo documentation:
  *
- * solveElliptic solves (alpha I + beta Laplacian) phi = rhs
+ * solveSelfGravPot solves (alpha I + beta Laplacian) phi = rhs
  * using AMRMultiGrid and AMRPoissonOp
  * Inputs:
  *  rhs: Right-hand side of the solve over the level.
@@ -97,9 +97,18 @@ solver.define(level0Domain, opFactory, &bottomSolver, numlevels);
 int lbase = 0;
 
 //so solve already.
-solver.solve(phi, rhs, numlevels-1, lbase);
+solver.solve(m_gravpot, m_UNew, numlevels-1, lbase);
 }
  
-// Fluxes?
+/* Calling procedure should look like:
+ void solveSelfGravPot(m_gravpot,            // Output self-gravity potential
+                       m_UNew,               // Input density: m_UNew
+                       const Vector<DisjointBoxLayout>& grids,      // Grid geometries
+                       m_ref_ratio,          // Vector defining refinement ratios between levels
+                       m_problemDomain,      // THe entire domain without refinement: the base grid
+                       alpha=0.0,            // No identity term
+                       beta1.193E9,          // beta=1/(4*pi*G) 
+                       Real coarsestDx)      //
+ */
 
 // Clean up and close up shop
