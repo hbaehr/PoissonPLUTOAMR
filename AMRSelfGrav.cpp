@@ -107,8 +107,20 @@ solver.solve(m_gravpot, m_UNew, numlevels-1, lbase);
                        m_ref_ratio,          // Vector defining refinement ratios between levels
                        m_problemDomain,      // THe entire domain without refinement: the base grid
                        alpha=0.0,            // No identity term
-                       beta1.193E9,          // beta=1/(4*pi*G) 
+                       beta=1.193E9,         // beta=1/(4*pi*G) 
                        Real coarsestDx)      //
  */
 
+/* ********************************************************** */
+void gradSelfGravPot(Vector<LevelData<FArrayBox>* >& ggravpot,  // Output gradient self-gravity potential: m_ggravpot
+                     ector<LevelData<FArrayBox>* >& gravpot,    // Input self-gravitational potential: m_gravpot
+                     )
+/*
+ * Calculate the acceleration due to the gravitational potential calculated above
+ * g = - grad(phi)
+ ************************************************************ */ 
+{
+// Is there a Chombo routine to calculate the gradient of an array?
+}
 // Clean up and close up shop
+// Output gravpot [phi] and acceleration [-grad(phi)]: used by PLUTO/Src/HD/prim_eqn.c
