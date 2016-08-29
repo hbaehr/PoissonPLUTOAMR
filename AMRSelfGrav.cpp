@@ -102,13 +102,13 @@ solver.solve(m_gravpot, m_UNew, numlevels-1, lbase);
  
 /* Calling procedure should look like:
  void solveSelfGravPot(m_gravpot,            // Output self-gravity potential
-                       m_UNew,               // Input density: m_UNew
-                       const Vector<DisjointBoxLayout>& grids,      // Grid geometries
+                       m_U,                  // Input density: m_UNew
+                       m_grids,              // Grid geometries
                        m_ref_ratio,          // Vector defining refinement ratios between levels
-                       m_problemDomain,      // THe entire domain without refinement: the base grid
+                       m_domain,             // THe entire domain without refinement: the base grid
                        alpha=0.0,            // No identity term
                        beta=1.193E9,         // beta=1/(4*pi*G) 
-                       Real coarsestDx)      //
+                       m_dx)                 // coarsest grid spacing
  */
 
 /* ********************************************************** */
