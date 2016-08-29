@@ -49,12 +49,12 @@ static void enableFpExceptions();
 #endif
 
 /* ********************************************************** */
-void solveSelfGravPot(Vector<LevelData<FArrayBox>* >& phi,         // Output self-gravity potential: m_gravpot
-                      const Vector<LevelData<FArrayBox>* > rhs,    // Input density: m_UNew
-                      const Vector<DisjointBoxLayout>& grids,      // Grid geometries: m_ref_ratio
-                      const Vector<int>& refRatios,                // Vector defining refinement ratios between levels
-                      const ProblemDomain& level0Domain,           // 
-                      Real alpha, Real beta, Real coarsestDx)      // constants alpha=0, beta=1/(4*pi*G)
+void solveSelfGravPot(Vector<LevelData<FArrayBox>* >& phi,       // Output self-gravity potential: m_gravpot
+                      const Vector<LevelData<FArrayBox>* > rhs,  // Input density: m_UNew
+                      const Vector<DisjointBoxLayout>& grids,    // Grid geometries at all levels:
+                      const Vector<int>& refRatios,              // Refinement ratios between levels: m_ref_ratio
+                      const ProblemDomain& level0Domain,         // Coarsest domain: m_domain
+                      Real alpha, Real beta, Real coarsestDx)    // constants alpha=0, beta=1/(4*pi*G)
 /*
  * Example from the Chombo documentation:
  *
