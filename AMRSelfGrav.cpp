@@ -49,12 +49,12 @@ static void enableFpExceptions();
 #endif
 
 /* ********************************************************** */
-void solveSelfGravPot(Vector<LevelData<FArrayBox>* >& phi,       // Output self-gravity potential: m_gravpot
-                      const Vector<LevelData<FArrayBox>* > rhs,  // Input density: m_UNew
-                      const Vector<DisjointBoxLayout>& grids,    // Grid geometries at all levels:
-                      const Vector<int>& refRatios,              // Refinement ratios between levels: m_ref_ratio
-                      const ProblemDomain& level0Domain,         // Coarsest domain: m_domain
-                      Real alpha, Real beta, Real coarsestDx)    // constants alpha=0, beta=1/(4*pi*G)
+void solveSelfGravPot(Vector<LevelData<FArrayBox>* >& a_gravpot,       // Output self-gravity potential: m_gravpot
+                      const Vector<LevelData<FArrayBox>* > a_U,  // Input density: m_UNew
+                      const Vector<DisjointBoxLayout>& a_grids,    // Grid geometries at all levels:
+                      const Vector<int>& m_ref_ratios,              // Refinement ratios between levels: m_ref_ratio
+                      const ProblemDomain& a_domain,         // Coarsest domain: m_domain
+                      Real alpha, Real beta, Real a_dx)    // constants alpha=0, beta=1/(4*pi*G)
 /*
  * Example from the Chombo documentation:
  *
@@ -73,12 +73,12 @@ void solveSelfGravPot(Vector<LevelData<FArrayBox>* >& phi,       // Output self-
  *
  ************************************************************ */
 {
-int numlevels = rhs.size(); // A different array for each refinement level
+int numlevels = a_U.size(); // A different array for each refinement level
 
 //define the operator factory
 AMRPoissonOpFactory opFactory;
-opFactory.define(level0Domain,
-                 grids, refRatios, coarsestDx,
+opFactory.define(m_domain,
+                 m_grids, m_ref_ratios, m_dx,
                  &ParseBC, alpha, beta);
 
 //this is the solver we shall use (From where does this come?)
@@ -91,13 +91,13 @@ BiCGStabSolver<LevelData<FArrayBox> > bottomSolver;
 bottomSolver.m_verbosity = 0;
 
 //define the solver
-solver.define(level0Domain, opFactory, &bottomSolver, numlevels);
+solver.define(m_domain, opFactory, &bottomSolver, numlevels);
 
 //we want to solve over the whole hierarchy
 int lbase = 0;
 
 //so solve already.
-solver.solve(m_gravpot, m_UNew, numlevels-1, lbase);
+solver.solve(m_gravpot, m_U, numlevels-1, lbase);
 }
  
 /* Calling procedure should look like:
