@@ -54,7 +54,9 @@ using std::ios;
 static void enableFpExceptions();
 #endif
     
-// The following part goes in PatchPluto.H header file
+// The following parts go in PatchPluto.H header file
+virtual void initialize(LevelData<FArrayBox>& a_gravpot);    
+    
 virtual void solveSelfGravPot(Vector<LevelData<FArrayBox>*>&       a_gravpot,
                               Vector<LevelData<FArrayBox>*>        a_U,
                               const Vector<DisjointBoxLayout>&     a_grids,

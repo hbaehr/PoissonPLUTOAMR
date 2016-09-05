@@ -48,6 +48,12 @@ using std::ios;
 static void enableFpExceptions();
 #endif
 
+  // initialize some temporary storage for the gravitational potential
+  {
+    CH_TIME("setup::Udefine");
+    m_gravpot.define(m_grids,m_numCons,m_numGhost*IntVect::Unit);
+  }
+    
 /* ********************************************************** */
 void solveSelfGravPot(Vector<LevelData<FArrayBox>* >& a_gravpot,       // Output self-gravity potential: m_gravpot
                       const Vector<LevelData<FArrayBox>* > a_U,  // Input density: m_UNew
