@@ -53,6 +53,8 @@ static void enableFpExceptions();
     CH_TIME("setup::Udefine");
     m_gravpot.define(m_grids,m_numCons,m_numGhost*IntVect::Unit);
   }
+
+// And maybe fill the ghost zones of m_gravpot or a_gravpot by interpolation? see LevelPluto for more info
     
 /* ********************************************************** */
 void solveSelfGravPot(Vector<LevelData<FArrayBox>* >& a_gravpot,       // Output self-gravity potential: m_gravpot
