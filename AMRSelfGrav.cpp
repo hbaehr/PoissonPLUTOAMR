@@ -120,9 +120,10 @@ solver.solve(m_gravpot, m_U, numlevels-1, lbase);
  */
 
 /* ********************************************************** */
-void gradSelfGravPot(Vector<LevelData<FArrayBox>* >& ggravpot,  // Output gradient self-gravity potential: m_ggravpot
-                     ector<LevelData<FArrayBox>* >& gravpot,    // Input self-gravitational potential: m_gravpot
-                     )
+void gradSelfGravPot(Vector<LevelData<FArrayBox>* >&       a_ggravpot,  // Output gradient self-gravity potential: m_ggravpot
+                     const Vector<LevelData<FArrayBox>* >& a_gravpot,    // Input self-gravitational potential: m_gravpot
+                     const Vector<DisjointBoxLayout>&      a_grid
+                    )
 /*
  * Calculate the acceleration due to the gravitational potential calculated above
  * g = - grad(phi)
