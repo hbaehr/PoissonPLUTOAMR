@@ -20,16 +20,16 @@ void PatchPluto::starter(FArrayBox& a_gravpot)
   int nxtot, nytot, nztot;
   int nv,  l_convert;
   int ibg, ieg, jbg, jeg, kbg, keg;
-  static double **ucons, **uprim;
+  //static double **ucons, **uprim;
   double x1,  x2,  x3;
   double x1s, x2s, x3s;
   double dx1, dx2, dx3;
   double us[256], u_av[256], b[3];
   double scrh, dx, cylr;
 
-  double ***UU[NVAR];
+  double ***GP[1];
   Grid   grid[3];
-  Box curBox = a_U.box();
+  Box curBox = a_gravpot.box();
   RBox tbox;
 
   FArrayBox dV(curBox,CHOMBO_NDV);
@@ -40,21 +40,21 @@ void PatchPluto::starter(FArrayBox& a_gravpot)
 
   jbg = jeg = kbg = keg = 0;
 
-  D_EXPAND(ibg = a_U.loVect()[0]; ieg = a_U.hiVect()[0];  ,
-           jbg = a_U.loVect()[1]; jeg = a_U.hiVect()[1];  ,
-           kbg = a_U.loVect()[2]; keg = a_U.hiVect()[2];)
+  D_EXPAND(ibg = a_gravpot.loVect()[0]; ieg = a_gravpot.hiVect()[0];  ,
+           jbg = a_gravpot.loVect()[1]; jeg = a_gravpot.hiVect()[1];  ,
+           kbg = a_gravpot.loVect()[2]; keg = a_gravpot.hiVect()[2];)
 
   NX1_TOT = nxtot = ieg - ibg + 1;
   NX2_TOT = nytot = jeg - jbg + 1;
   NX3_TOT = nztot = keg - kbg + 1;
 
  if (uprim == NULL){
-   uprim = ARRAY_2D(NMAX_POINT, NVAR, double);
-   ucons = ARRAY_2D(NMAX_POINT, NVAR, double);
+   //uprim = ARRAY_2D(NMAX_POINT, NVAR, double);
+   //ucons = ARRAY_2D(NMAX_POINT, NVAR, double);
   }
 
- for (nv=0 ; nv<NVAR ; nv ++)
-   UU[nv] = ArrayMap(nztot,nytot,nxtot,a_U.dataPtr(nv));
+ 
+ GP[0] = ArrayMap(nztot,nytot,nxtot,a_gravpot.dataPtr(0));
 
  /* ----  set labels  ---- */
 
