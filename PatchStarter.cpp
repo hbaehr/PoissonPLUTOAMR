@@ -18,7 +18,7 @@ void PatchPluto::starter(FArrayBox& a_gravpot)
   int i, j, k;
   int isub, jsub, ksub, nsub = 5;
   int nxtot, nytot, nztot;
-  int nv,  l_convert;
+  int nv,  l_convert;             // cannot find any purpose for l_convert
   int ibg, ieg, jbg, jeg, kbg, keg;
   //static double **ucons, **uprim;
   double x1,  x2,  x3;
@@ -127,7 +127,8 @@ void PatchPluto::starter(FArrayBox& a_gravpot)
 /* --------------------------------------------------------------------
      Convert primitive variables to conservative ones
      
-     Is this necessary for the case of only gravitational potential?
+     How much of this is necessary for the case of only gravitational 
+     potential? I cannot imagine that the 
    -------------------------------------------------------------------- */
 
   for (k = 0; k < nztot ; k++) {
