@@ -24,7 +24,7 @@ void PatchPluto::starter(FArrayBox& a_gravpot)
   double x1,  x2,  x3;
   double x1s, x2s, x3s;
   double dx1, dx2, dx3;
-  double us[256], u_av[256], b[3];
+  double gps[256], gp_av[256], b[3];
   double scrh, dx, cylr;
 
   double ***GP[1];
@@ -81,14 +81,14 @@ void PatchPluto::starter(FArrayBox& a_gravpot)
     x2 = grid[JDIR].x[j];
     x1 = grid[IDIR].x[i];
 
-    for (nv = 0; nv < NVAR; nv++)  UU[nv][k][j][i] = u_av[nv] = 0.0;
+    GP[0][k][j][i] = gp_av[0] = 0.0;
     
 #ifdef GLM_MHD
-    u_av[PSI_GLM] = us[PSI_GLM] = 0.0;
+    gp_av[PSI_GLM] = gps[PSI_GLM] = 0.0;
 #endif
 
 /*  ----------------------------------------------------------------
-                Compute volume averages
+                Compute volume averages 
     ---------------------------------------------------------------- */
 
     #if INITIAL_SMOOTHING == YES
@@ -101,24 +101,24 @@ void PatchPluto::starter(FArrayBox& a_gravpot)
        x2s = x2 + (double)(1.0 - nsub + 2.0*jsub)/(double)(2.0*nsub)*dx2;
        x3s = x3 + (double)(1.0 - nsub + 2.0*ksub)/(double)(2.0*nsub)*dx3;
 
-       Init (us, x1s, x2s, x3s);
-       for (nv = 0; nv < NVAR; nv++) {
-         u_av[nv] += us[nv]/(double)(nsub*nsub*nsub);
+       Init (gps, x1s, x2s, x3s);
+       for (nv = 0; nv < 1; nv++) {
+         gp_av[0] += gps[0]/(double)(nsub*nsub*nsub);
        }
-     }}}
+     }}} // ??????
 
     #else
 
-     Init (u_av, x1, x2, x3);
+     Init (gp_av, x1, x2, x3);
     
     #endif
 
-    for (nv = 0; nv < NVAR; nv++) UU[nv][k][j][i] = u_av[nv];
+    UU[0][k][j][i] = gp_av[0];
 
     #if (PHYSICS == MHD || PHYSICS == RMHD) 
      #if ASSIGN_VECTOR_POTENTIAL == YES
       VectorPotentialDiff(b, i, j, k, grid);
-      for (nv = 0; nv < DIMENSIONS; nv++) UU[BX1+nv][k][j][i] = b[nv];
+      for (nv = 0; nv < DIMENSIONS; nv++) GP[BX1+nv][k][j][i] = b[nv];
      #endif  /* ASSIGN_VECTOR_POTENTIAL */
     #endif /* PHYSICS == MHD || PHYSICS == RMHD */
 
@@ -126,6 +126,8 @@ void PatchPluto::starter(FArrayBox& a_gravpot)
 
 /* --------------------------------------------------------------------
      Convert primitive variables to conservative ones
+     
+     Is this necessary for the case of only gravitational potential?
    -------------------------------------------------------------------- */
 
   for (k = 0; k < nztot ; k++) {
@@ -173,27 +175,31 @@ void PatchPluto::starter(FArrayBox& a_gravpot)
   }}
 
 /* --------------------------------------------------
-     Pass U*dV/m_dx^3 to the library
+     Pass GP*dV/m_dx^3 to the library
+     
+     The passing of gravpot to the library needs to 
+     happen, but I am unsure about the necessity 
+     of the volume calculation.
    -------------------------------------------------- */
 
   #if GEOMETRY != CARTESIAN
    #if CHOMBO_CONS_AM == YES
     #if ROTATING_FRAME == YES
-     Box aBox = a_U.box();
+     Box aBox = a_gravpot.box();
      for(BoxIterator bit(aBox); bit.ok(); ++bit) {
        const IntVect& iv = bit();
-       a_U(iv,iMPHI) += a_U(iv,RHO)*dV(iv,1)*g_OmegaZ;
+       a_U(iv,iMPHI) += a_gravpot(iv,RHO)*dV(iv,1)*g_OmegaZ;
        a_U(iv,iMPHI) *= dV(iv,1);
      }
     #else
      a_U.mult(dV,1,iMPHI);
     #endif
    #endif
-   for (nv = 0; nv < a_U.nComp(); nv++) a_U.mult(dV,0,nv);
+   for (nv = 0; nv < a_gravpot.nComp(); nv++) a_gravpot.mult(dV,0,nv);
   #else
-   if (g_stretch_fact != 1.) a_U *= g_stretch_fact;
+   if (g_stretch_fact != 1.) a_gravpot *= g_stretch_fact;
   #endif
  
-  for (nv = 0; nv < NVAR; nv++) FreeArrayMap(UU[nv]);
+  for (nv = 0; nv < 1; nv++) FreeArrayMap(GP[nv]);
   FreeGrid(grid);
 }
