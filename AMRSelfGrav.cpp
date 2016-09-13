@@ -89,7 +89,7 @@ opFactory.define(m_domain,
                  m_grids, m_ref_ratios, m_dx,
                  &ParseBC, alpha, beta);
 
-//this is the solver we shall use (From where does this come?)
+//this is the solver we shall use
 AMRMultiGrid<LevelData<FArrayBox> > solver;
 
 //this is the solver for the bottom of the muligrid v-cycle (???)
@@ -106,6 +106,20 @@ int lbase = 0;
 
 //so solve already.
 solver.solve(m_gravpot, m_U, numlevels-1, lbase);
+    
+//define the gradient solver
+NodePoissonOp getGradient;
+getGradient.define(
+                  );
+
+//now calculate the gradient
+
+    
+//get the gradient while we are at it?    
+NodePoissonOp::gradient(LevelData<NodeFArrayBox>&       a_ggravpot,
+                        LevelData<NodeFArrayBox>&       a_gravpot,
+                        const LevelData<NodeFArrayBox>  *a_gravpotCoarsePtr
+                       )
 }
  
 /* Calling procedure should look like:
@@ -130,6 +144,10 @@ void gradSelfGravPot(Vector<LevelData<FArrayBox>* >&       a_ggravpot,  // Outpu
  ************************************************************ */ 
 {
 // Is there a Chombo routine to calculate the gradient of an array?
+// There is! NodePoissonOp should solve for gradPhi, but it is node-centered(?)
+
+
 }
+
 // Clean up and close up shop
 // Output gravpot [phi] and acceleration [-grad(phi)]: used by PLUTO/Src/HD/prim_eqn.c
