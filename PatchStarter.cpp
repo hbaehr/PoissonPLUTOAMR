@@ -3,7 +3,7 @@
 using std::string    
 
 /* ***************************************************************************
-*  Template for making an FArrayBox to hold the grravitational potential data
+*  Template for making an FArrayBox to hold the gravitational potential data
 *
 *  Borrowed from the existing PLUTO file /Src/Chombo/PatchStartup.cpp
 *
@@ -166,6 +166,7 @@ void PatchPluto::starter(FArrayBox& a_gravpot)
       UU[nv][k][j][i] = ucons[i][nv];
     }}
 
+// There should not be any issue between entropy and grav. potential
 #if ENTROPY_SWITCH
     Entropy(uprim, UU[ENTR][k][j], 0, nxtot-1);  /* -- primitive: s -- */
     for (i = 0; i < nxtot; i++) {
@@ -189,11 +190,11 @@ void PatchPluto::starter(FArrayBox& a_gravpot)
      Box aBox = a_gravpot.box();
      for(BoxIterator bit(aBox); bit.ok(); ++bit) {
        const IntVect& iv = bit();
-       a_U(iv,iMPHI) += a_gravpot(iv,RHO)*dV(iv,1)*g_OmegaZ;
-       a_U(iv,iMPHI) *= dV(iv,1);
+       a_gravpot(iv,iMPHI) += a_gravpot(iv,RHO)*dV(iv,1)*g_OmegaZ;
+       a_gravpot(iv,iMPHI) *= dV(iv,1);
      }
     #else
-     a_U.mult(dV,1,iMPHI);
+     a_gravpot.mult(dV,1,iMPHI);
     #endif
    #endif
    for (nv = 0; nv < a_gravpot.nComp(); nv++) a_gravpot.mult(dV,0,nv);
