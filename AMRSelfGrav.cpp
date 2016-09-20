@@ -55,7 +55,7 @@ static void enableFpExceptions();
   }
 
 // And maybe fill the ghost zones of m_gravpot or a_gravpot by interpolation? see LevelPluto for more info
-    
+
 /* ********************************************************** */
 void solveSelfGravPot(Vector<LevelData<FArrayBox>* >& a_gravpot,       // Output self-gravity potential: m_gravpot
                       const Vector<LevelData<FArrayBox>* > a_U,  // Input density: m_UNew
@@ -122,6 +122,24 @@ NodePoissonOp::gradient(LevelData<NodeFArrayBox>&       a_ggravpot,
                        )
 }
  
+// Loop over the patches of a level to assign initial conditions
+void PatchPluto::initiate(LevelData<FArrayBox>& a_gravpot)
+{
+    
+ CH_assert(m_isDefined);
+    
+ DataIterator dit = a_gravpot.boxLayout().dataIterator();
+    
+ // Iterator for all grids in this level
+ for (dit.begin(); dit.ok(); ++dit)
+  {
+    // Storage for current grid
+    FArrayBox& U = a_gravpot[dit()];
+    // Set up initial conditions in this patch
+    starter(U);
+  }
+}
+
 /* Calling procedure should look like:
  void solveSelfGravPot(m_gravpot,            // Output self-gravity potential
                        m_U,                  // Input density: m_UNew
