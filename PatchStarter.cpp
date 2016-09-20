@@ -82,10 +82,6 @@ void PatchPluto::starter(FArrayBox& a_gravpot)
     x1 = grid[IDIR].x[i];
 
     GP[0][k][j][i] = gp_av[0] = 0.0;
-    
-#ifdef GLM_MHD
-    gp_av[PSI_GLM] = gps[PSI_GLM] = 0.0;
-#endif
 
 /*  ----------------------------------------------------------------
                 Compute volume averages 
@@ -126,16 +122,13 @@ void PatchPluto::starter(FArrayBox& a_gravpot)
 
 /* --------------------------------------------------------------------
      Convert primitive variables to conservative ones
-     
-     How much of this is necessary for the case of only gravitational 
-     potential? I cannot imagine that the 
    -------------------------------------------------------------------- */
 
   for (k = 0; k < nztot ; k++) {
   for (j = 0; j < nytot ; j++) {
 
     for (i = 0; i < nxtot; i++) {
-      for (nv = 0 ; nv < NVAR ; nv++) {
+      for (nv = 0 ; nv < 1 ; nv++) {
         us[nv] = uprim[i][nv] = UU[nv][k][j][i];
       }
 
@@ -162,7 +155,7 @@ void PatchPluto::starter(FArrayBox& a_gravpot)
 
     PrimToCons (uprim, ucons, 0, nxtot-1);
     for (i = 0; i < nxtot; i++) {
-    for (nv = 0; nv < NVAR; nv++) {
+    for (nv = 0; nv < 1; nv++) {
       UU[nv][k][j][i] = ucons[i][nv];
     }}
 
@@ -197,11 +190,11 @@ void PatchPluto::starter(FArrayBox& a_gravpot)
      a_gravpot.mult(dV,1,iMPHI);
     #endif
    #endif
-   for (nv = 0; nv < a_gravpot.nComp(); nv++) a_gravpot.mult(dV,0,nv);
+   a_gravpot.mult(dV,0,0);
   #else
    if (g_stretch_fact != 1.) a_gravpot *= g_stretch_fact;
   #endif
  
-  for (nv = 0; nv < 1; nv++) FreeArrayMap(GP[nv]);
+  FreeArrayMap(GP[0]);
   FreeGrid(grid);
 }
