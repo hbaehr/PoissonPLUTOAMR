@@ -55,7 +55,7 @@ static void enableFpExceptions();
 #endif
     
 // The following parts go in PatchPluto.H header file
-    
+virtual void initiate(LevelData<FArrayBox>& a_gravpot)    
     
 virtual void starter(LevelData<FArrayBox>& a_gravpot);
     
