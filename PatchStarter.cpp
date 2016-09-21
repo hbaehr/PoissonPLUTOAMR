@@ -20,7 +20,7 @@ void PatchPluto::starter(FArrayBox& a_gravpot)
   int nxtot, nytot, nztot;
   int nv,  l_convert;             // cannot find any purpose for l_convert
   int ibg, ieg, jbg, jeg, kbg, keg;
-  //static double **ucons, **uprim;
+  static double **ucons, **uprim;
   double x1,  x2,  x3;
   double x1s, x2s, x3s;
   double dx1, dx2, dx3;
@@ -129,7 +129,7 @@ void PatchPluto::starter(FArrayBox& a_gravpot)
 
     for (i = 0; i < nxtot; i++) {
       for (nv = 0 ; nv < 1 ; nv++) {
-        us[nv] = uprim[i][nv] = UU[nv][k][j][i];
+        us[nv] = uprim[i][nv] = GP[nv][k][j][i];
       }
 
   /* -- check if primitive values are physically ok -- */
@@ -159,6 +159,7 @@ void PatchPluto::starter(FArrayBox& a_gravpot)
       UU[nv][k][j][i] = ucons[i][nv];
     }}
 
+
 // There should not be any issue between entropy and grav. potential
 #if ENTROPY_SWITCH
     Entropy(uprim, UU[ENTR][k][j], 0, nxtot-1);  /* -- primitive: s -- */
@@ -166,7 +167,7 @@ void PatchPluto::starter(FArrayBox& a_gravpot)
       UU[ENTR][k][j][i] *= UU[RHO][k][j][i];   /* -- conservative: s*D -- */
     }
 #endif
-
+       
   }}
 
 /* --------------------------------------------------
