@@ -106,20 +106,6 @@ int lbase = 0;
 
 //so solve already.
 solver.solve(m_gravpot, m_U, numlevels-1, lbase);
-    
-//define the gradient solver
-NodePoissonOp getGradient;
-getGradient.define(
-                  );
-
-//now calculate the gradient
-
-    
-//get the gradient while we are at it?    
-NodePoissonOp::gradient(LevelData<NodeFArrayBox>&       a_ggravpot,
-                        LevelData<NodeFArrayBox>&       a_gravpot,
-                        const LevelData<NodeFArrayBox>  *a_gravpotCoarsePtr
-                       )
 }
  
 // Loop over the patches of a level to assign initial conditions
@@ -150,22 +136,6 @@ void PatchPluto::initiate(LevelData<FArrayBox>& a_gravpot)
                        beta=1.193E9,         // beta=1/(4*pi*G) 
                        m_dx)                 // coarsest grid spacing
  */
-
-/* ********************************************************** */
-void gradSelfGravPot(Vector<LevelData<FArrayBox>* >&       a_ggravpot,  // Output gradient self-gravity potential: m_ggravpot
-                     const Vector<LevelData<FArrayBox>* >& a_gravpot,    // Input self-gravitational potential: m_gravpot
-                     const Vector<DisjointBoxLayout>&      a_grid
-                    )
-/*
- * Calculate the acceleration due to the gravitational potential calculated above
- * g = - grad(phi)
- ************************************************************ */ 
-{
-// Is there a Chombo routine to calculate the gradient of an array?
-// There is! NodePoissonOp should solve for gradPhi, but it is node-centered(?)
-
-
-}
 
 // Clean up and close up shop
 // Output gravpot [phi] and acceleration [-grad(phi)]: used by PLUTO/Src/HD/prim_eqn.c
