@@ -120,9 +120,9 @@ void PatchPluto::initiate(LevelData<FArrayBox>& a_gravpot)
  for (dit.begin(); dit.ok(); ++dit)
   {
     // Storage for current grid
-    FArrayBox& U = a_gravpot[dit()];
+    FArrayBox& U = a_gravpot[dit()];   // Not U, but what?
     // Set up initial conditions in this patch
-    starter(U);
+    starter(U);                        // NOt U, but what?
   }
 }
 
