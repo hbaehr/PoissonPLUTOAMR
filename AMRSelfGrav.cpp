@@ -107,15 +107,16 @@ int lbase = 0;
 //so solve already.
 solver.solve(m_gravpot, m_U, numlevels-1, lbase);
 }
- 
+
 // Loop over the patches of a level to assign initial conditions
 void PatchPluto::initiate(LevelData<FArrayBox>& a_gravpot)
 {
-    
+
  CH_assert(m_isDefined);
-    
+
+// DataIterator does what?
  DataIterator dit = a_gravpot.boxLayout().dataIterator();
-    
+
  // Iterator for all grids in this level
  for (dit.begin(); dit.ok(); ++dit)
   {
@@ -133,7 +134,7 @@ void PatchPluto::initiate(LevelData<FArrayBox>& a_gravpot)
                        m_ref_ratio,          // Vector defining refinement ratios between levels
                        m_domain,             // THe entire domain without refinement: the base grid
                        alpha=0.0,            // No identity term
-                       beta=1.193E9,         // beta=1/(4*pi*G) 
+                       beta=1.193E9,         // beta=1/(4*pi*G)
                        m_dx)                 // coarsest grid spacing
  */
 

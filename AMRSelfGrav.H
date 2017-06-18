@@ -53,19 +53,19 @@ using std::ios;
 #ifdef TRAP_FPE
 static void enableFpExceptions();
 #endif
-    
+
 // The following parts go in PatchPluto.H header file
-virtual void initiate(LevelData<FArrayBox>& a_gravpot);    
-    
+virtual void initiate(LevelData<FArrayBox>& a_gravpot);
+
 virtual void starter(LevelData<FArrayBox>& a_gravpot);
-    
+
 virtual void solveSelfGravPot(Vector<LevelData<FArrayBox>*>&       a_gravpot,
                               Vector<LevelData<FArrayBox>*>        a_U,
                               const Vector<DisjointBoxLayout>&     a_grids,
                               const Vector<int>&                   m_ref_ratio,
                               const ProblemDomain&                 a_domain,
                               Real                                 alpha=0.0,
-                              Real                                 beta=1.193E9,
+                              Real                                 beta=1.193E9, // This should perhaps be problem defined
                               Real                                 a_dx);
 
 /* ********************************************************** */
@@ -73,6 +73,6 @@ void solveElliptic(Vector<LevelData<FArrayBox>* >& phi,         // Output self-g
                    const Vector<LevelData<FArrayBox>* > rhs,    // Input density: m_UNew
                    const Vector<DisjointBoxLayout>& grids,      // Grid geometries: m_ref_ratio
                    const Vector<int>& refRatios,                // Vector defining refinement ratios between levels
-                   const ProblemDomain& level0Domain,           // 
+                   const ProblemDomain& level0Domain,           //
                    Real alpha, Real beta, Real coarsestDx)      // constants alpha=0, beta=1/(4*pi*G)
 /*
