@@ -68,7 +68,7 @@ virtual void solveSelfGravPot(Vector<LevelData<FArrayBox>*>&       a_gravpot,
                               Real                                 beta=1.193E9, // This should perhaps be problem defined
                               Real                                 a_dx);
 
-/* ********************************************************** */
+/* **********************************************************
 void solveElliptic(Vector<LevelData<FArrayBox>* >& phi,         // Output self-gravity potential: m_gravpot
                    const Vector<LevelData<FArrayBox>* > rhs,    // Input density: m_UNew
                    const Vector<DisjointBoxLayout>& grids,      // Grid geometries: m_ref_ratio
