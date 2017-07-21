@@ -50,15 +50,19 @@ static void enableFpExceptions();
 
   // initialize some temporary storage for the gravitational potential
   {
-    CH_TIME("setup::Udefine");
+  //  CH_TIME("setup::Udefine"); // This is used to time processes for debugging purposes
     m_gravpot.define(m_grids,m_numCons,m_numGhost*IntVect::Unit);
   }
+
+// Boundary conditions go here?
+
+
 
 // And maybe fill the ghost zones of m_gravpot or a_gravpot by interpolation? see LevelPluto for more info
 
 // Where does this belong? PatchPluto.cpp? The header file states that physics
 // does not belong to the PatchPluto class but rather needs to be subclassed
-// within 
+// within
 
 /* ********************************************************** */
 void solveSelfGravPot(Vector<LevelData<FArrayBox>* >& a_gravpot,       // Output self-gravity potential: m_gravpot
