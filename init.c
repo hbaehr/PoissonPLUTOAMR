@@ -137,6 +137,11 @@ void Analysis (const Data *d, Grid *grid)
 void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
 /*
  *
+ * What kind of boundary do I need for the self-gravitational potential?
+ * Look to Lichtenberg & Schleicher 2014 and others for ideas of how to
+ * implement this.
+ *
+ *
  *********************************************************************** */
 {
   int   i, j, k, nv;

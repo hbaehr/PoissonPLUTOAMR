@@ -56,6 +56,10 @@ static void enableFpExceptions();
 
 // And maybe fill the ghost zones of m_gravpot or a_gravpot by interpolation? see LevelPluto for more info
 
+// Where does this belong? PatchPluto.cpp? The header file states that physics
+// does not belong to the PatchPluto class but rather needs to be subclassed
+// within 
+
 /* ********************************************************** */
 void solveSelfGravPot(Vector<LevelData<FArrayBox>* >& a_gravpot,       // Output self-gravity potential: m_gravpot
                       const Vector<LevelData<FArrayBox>* > a_U,  // Input density: m_UNew
