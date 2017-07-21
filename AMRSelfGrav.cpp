@@ -31,6 +31,18 @@ using std::ios;
 #include "CH_Timer.H"
 #include "memusage.H"
 
+#include "LevelData.H"
+#include "FArrayBox.H"
+#include "Vector.H"
+#include "AMRIO.H"
+#include "BRMeshRefine.H"
+#include "LoadBalance.H"
+#include "ProblemDomain.H"
+#include "BCFunc.H"
+#include "BiCGStabSolver.H"
+#include "BoxIterator.H"
+#include "CONSTANTS.H"
+
 #include "AMR.H"
 #include "AMRLevelPlutoFactory.H"
 #include "AMRPoissonOp.H"
