@@ -60,11 +60,13 @@ using std::ios;
 static void enableFpExceptions();
 #endif
 
+/* For time being, unnecessary
   // initialize some temporary storage for the gravitational potential
   {
   //  CH_TIME("setup::Udefine"); // This is used to time processes for debugging purposes
     m_gravpot.define(m_grids,m_numCons,m_numGhost*IntVect::Unit);
   }
+  */
 
 // Other things which need to be addressed:
 // 1) Boundary conditions
@@ -408,7 +410,7 @@ void setRHS(Vector<LevelData<FArrayBox>* > a_rhs, // Output array of \rho
 }
 
 /* ********************************************************** */
-void solveSelfGravPot(Vector<LevelData<FArrayBox>* >& a_gravpot,       // Output self-gravity potential: m_gravpot
+/*void solveSelfGravPot(Vector<LevelData<FArrayBox>* >& a_gravpot,       // Output self-gravity potential: m_gravpot
                       const Vector<LevelData<FArrayBox>* > a_U,  // Input density: m_UNew
                       const Vector<DisjointBoxLayout>& a_grids,    // Grid geometries at all levels:
                       const Vector<int>& m_ref_ratios,              // Refinement ratios between levels: m_ref_ratio
@@ -431,7 +433,7 @@ void solveSelfGravPot(Vector<LevelData<FArrayBox>* >& a_gravpot,       // Output
  *  phi = (alpha I + beta Lapl)^{-1}(rhs)
  *
  ************************************************************ */
-{
+/*{
 int numlevels = a_U.size(); // A different array for each refinement level
 
 //define the operator factory
@@ -458,7 +460,9 @@ int lbase = 0;
 //so solve already.
 solver.solve(m_gravpot, m_U, numlevels-1, lbase);
 }
+*/
 
+/*
 // Loop over the patches of a level to assign initial conditions
 void PatchPluto::initiate(LevelData<FArrayBox>& a_gravpot)
 {
@@ -477,6 +481,7 @@ void PatchPluto::initiate(LevelData<FArrayBox>& a_gravpot)
     starter(U);                        // NOt U, but what?
   }
 }
+*/
 
 /* Calling procedure should look like:
  void solveSelfGravPot(m_gravpot,            // Output self-gravity potential
