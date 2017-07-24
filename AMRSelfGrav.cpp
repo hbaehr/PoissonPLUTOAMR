@@ -90,11 +90,11 @@ void setRHS(Vector<LevelData<FArrayBox>* > a_rhs, // Output array of \rho
 
   for (int lev=0; lev<=a_finestLevel; lev++)      // Looping over all levels
     {
-      LevelData<FArrayBox>& levelRhs = *(a_rhs[lev]);                      // Each a_rhs[lev] is an FArrayBox
-      const DisjointBoxLayout& levelGrids = levelRhs.getBoxes();           //
+      LevelData<FArrayBox>& levelRhs = *(a_rhs[lev]);                      // Each a_rhs[lev] is an FArrayBox temporarily stored as levelRhs
+      const DisjointBoxLayout& levelGrids = levelRhs.getBoxes();           // Get box indeces for each level
 
       // rhs is cell-centered...
-      RealVect ccOffset = 0.5*a_amrDx[lev]*RealVect::Unit;                 //
+      RealVect ccOffset = 0.5*a_amrDx[lev]*RealVect::Unit;                 // Adjust for the cell-centered location of the data ???
 
       DataIterator levelDit = levelGrids.dataIterator();                   // Write data to a level
       for (levelDit.begin(); levelDit.ok(); ++levelDit)                    // Iterate over all points on the level?
@@ -192,8 +192,64 @@ void setRHS(Vector<LevelData<FArrayBox>* > a_rhs, // Output array of \rho
  }
 
 
+/*  Setting up the parameters of the solver
+*
+*
+*
+*
+*/
 
 
+ void setupSolver(AMRMultiGrid<LevelData<FArrayBox> > *a_amrSolver,              // Name of the solver
+             LinearSolver<LevelData<FArrayBox> >& a_bottomSolver,                //
+             const Vector<DisjointBoxLayout>& a_grids,                           // Grids for each AMR level
+             const Vector<ProblemDomain>& a_domain,                              // Entire domain
+             const Vector<int>& a_ref_ratio,                                     // Refinement ratios between levels
+             const Vector<Real>& a_amrDx,                                        // *** dx: not sure what this value is atm
+             int a_finestLevel)                                                  // *** number of most refined level
+ {
+   CH_TIME("setupSolver");                                                       // Timing diagnostic
+
+   ParmParse ppSolver("solver");                                                 // ??? WHere does ppSolver come from?
+
+   int numLevels = a_finestLevel+1;                                              // 0 index count of total levels
+
+   AMRPoissonOpFactory opFactory;                                                // Create an instance of AMRPoissonOpFactory
+
+   // solving poisson problem here
+   Real alpha =0.0;                                                              // Constants which determine form of the Poisson equation
+   Real beta = 1.0;                                                              // \beta will be 1/(4*\pi*G)
+
+   opFactory.define(a_domain[0],                                                 // Define the parameters that go into each instance of opFactory
+                    a_grids,
+                    a_ref ratio,
+                    a_amrDx[0],
+                    &ParseBC, alpha, beta);
+
+   AMRLevelOpFactory<LevelData<FArrayBox> >& castFact = (AMRLevelOpFactory<LevelData<FArrayBox> >& ) opFactory;  // ??? dummy?
+
+   a_amrSolver->define(a_domain[0], castFact,                                    // THe solver?
+                      &a_bottomSolver, numLevels);
+
+   // multigrid solver parameters                                                // Parameters for solving over multiple levels ???
+   int numSmooth, numMG, maxIter;
+   Real eps, hang;
+   ppSolver.get("num_smooth", numSmooth);
+   ppSolver.get("num_mg",     numMG);
+   ppSolver.get("max_iterations", maxIter);
+   ppSolver.get("tolerance", eps);
+   ppSolver.get("hang",      hang);
+
+   Real normThresh = 1.0e-30;
+   a_amrSolver->setSolverParameters(numSmooth, numSmooth, numSmooth,
+                                numMG, maxIter, eps, hang, normThresh);
+   a_amrSolver->m_verbosity = s_verbosity-1;
+
+   // optional parameters
+   ppSolver.query("num_pre", a_amrSolver->m_pre);
+   ppSolver.query("num_post", a_amrSolver->m_post);
+   ppSolver.query("num_bottom", a_amrSolver->m_bottom);
+ }
 
 
 
