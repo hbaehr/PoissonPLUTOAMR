@@ -66,15 +66,136 @@ static void enableFpExceptions();
     m_gravpot.define(m_grids,m_numCons,m_numGhost*IntVect::Unit);
   }
 
-// Boundary conditions go here?
+// Other things which need to be addressed:
+// 1) Boundary conditions
+// 2) Initial conditions
+// 2) Fill the ghost zones of m_gravpot or a_gravpot by interpolation? see LevelPluto for more info
+
+/* Set the right hand side of Poisson equation
+*  \nabla \Phi = 4*\pi*G*\rho
+*
+*  Since everything on the RHS outside of \rho is constant, these are put into
+*  the constant value b. However, since \rho has already been calculate in the
+*  previous step, it might be unnecessary to do this step.
+*
+*  I will include it for now for completeness and perhaps testing purposes
+*/
+void setRHS(Vector<LevelData<FArrayBox>* > a_rhs, // Output array of \rho
+            Vector<ProblemDomain>& a_domain,      // Grid domain
+            Vector<int>& m_ref_ratio,             // Refinement ratios between levels
+            Vector<Real>& a_amrDx,                // *** dx: not sure what this value is atm
+            int a_finestLevel)                    // *** number of most refined level
+{
+  CH_TIME("setRHS");
+
+  for (int lev=0; lev<=a_finestLevel; lev++)      // Looping over all levels
+    {
+      LevelData<FArrayBox>& levelRhs = *(a_rhs[lev]);                      // Each a_rhs[lev] is an FArrayBox
+      const DisjointBoxLayout& levelGrids = levelRhs.getBoxes();           //
+
+      // rhs is cell-centered...
+      RealVect ccOffset = 0.5*a_amrDx[lev]*RealVect::Unit;                 //
+
+      DataIterator levelDit = levelGrids.dataIterator();                   // Write data to a level
+      for (levelDit.begin(); levelDit.ok(); ++levelDit)                    // Iterate over all points on the level?
+        {
+          FArrayBox& thisRhs = levelRhs[levelDit];                         // Dummy thisRhs for the iteration of this loop
+
+          if (s_probtype == zeroRHS)                                       // Various patterns for the distribution of RHS
+            {
+              thisRhs.setVal(0.0);                                         // 0 everywhere
+            }
+          else if (s_probtype == unityRHS)
+            {
+              thisRhs.setVal(1.0);                                         // 1 everywhere
+            }
+          else if (s_probtype == sinusoidal)
+            {
+
+              BoxIterator bit(thisRhs.box());                              // Sine wave
+              for (bit.begin(); bit.ok(); ++bit)
+                {
+                  IntVect iv = bit();
+                  RealVect loc(iv);
+                  loc *= a_amrDx[lev];
+                  loc += ccOffset;
+                  loc *= 2.0*Pi;
+
+                  thisRhs(iv,0) = D_TERM(sin(loc[0]),
+                                         *cos(loc[1]),
+                                         *sin(loc[2]));
+
+                 }
+
+            }
+          else if (s_probtype == gaussians)
+            {
+              int numGaussians = 3;                                        // Gaussian distributions
+              Vector<RealVect> center(numGaussians,RealVect::Zero);
+              Vector<Real> scale(numGaussians, 1.0);
+              Vector<Real> strength(numGaussians, 1.0);
+
+              for (int n=0; n<numGaussians; n++)
+                {
+                  if (n==0)
+                    {
+                      strength[0] = 1.0;
+                      scale[0] = 1.0e-2;
+                      center[0] = 0.25*RealVect::Unit;
+                    }
+                  else if (n == 1)
+                    {
+                      strength[1] = 3.0;
+                      scale[1] = 1.0e-2;
+                      center[1] = RealVect(D_DECL(0.5,0.75, 0.75));
+                    }
+                  else if (n == 2)
+                    {
+                      strength[2] = 2.0;
+                      scale[2] = 1.0e-2;
+                      center[2] = RealVect(D_DECL(0.75,0.5, 0.5));
+                    }
+                  else
+                    {
+                      MayDay::Error("too many Gaussian sources attempted");
+                    }
+                }
+
+              thisRhs.setVal(0.0);
+
+              BoxIterator bit(thisRhs.box());
+              for (bit.begin(); bit.ok(); ++bit)
+                {
+                  IntVect iv = bit();
+                  RealVect loc(iv);
+                  loc *= a_amrDx[lev];
+                  loc += ccOffset;
+
+                  for (int n=0; n<numGaussians; n++)
+                    {
+                      RealVect dist = loc - center[n];
+                      Real radSqr = D_TERM(dist[0]*dist[0],
+                                           +dist[1]*dist[1],
+                                            +dist[2]*dist[2]);
+
+                       Real val = strength[n]*exp(-radSqr/scale[n]);
+                       thisRhs(iv,0) += val;
+                     }
+                 }
+             }
+           else
+             {
+               MayDay::Error("undefined problem type");
+             }
+         } // end loop over grids on this level
+     } // end loop over levels
+ }
 
 
 
-// And maybe fill the ghost zones of m_gravpot or a_gravpot by interpolation? see LevelPluto for more info
 
-// Where does this belong? PatchPluto.cpp? The header file states that physics
-// does not belong to the PatchPluto class but rather needs to be subclassed
-// within
+
+
 
 /* ********************************************************** */
 void solveSelfGravPot(Vector<LevelData<FArrayBox>* >& a_gravpot,       // Output self-gravity potential: m_gravpot
