@@ -228,7 +228,7 @@ void setRHS(Vector<LevelData<FArrayBox>* > a_rhs, // Output array of \rho
 
    AMRLevelOpFactory<LevelData<FArrayBox> >& castFact = (AMRLevelOpFactory<LevelData<FArrayBox> >& ) opFactory;  // ??? dummy?
 
-   a_amrSolver->define(a_domain[0], castFact,                                    // THe solver?
+   a_amrSolver->define(a_domain[0], castFact,                                    // The solver?
                       &a_bottomSolver, numLevels);
 
    // multigrid solver parameters                                                // Parameters for solving over multiple levels ???
@@ -251,7 +251,161 @@ void setRHS(Vector<LevelData<FArrayBox>* > a_rhs, // Output array of \rho
    ppSolver.query("num_bottom", a_amrSolver->m_bottom);
  }
 
+ int runSolver()                                                                 // Now that everything is set up (???) calculate the potential
+ {
+   CH_TIME("runSolver");                                                         // time keeping diagnostic
 
+   int status = 0, mg_type = 0;                                                  // ???
+   ParmParse ppMain("main");
+
+   ppMain.query("verbosity", s_verbosity);                                       // Noisiness control ???
+
+   // set up grids&
+   Vector<DisjointBoxLayout> amrGrids;                                           // define non-temporary structures ... ???
+   Vector<ProblemDomain> amrDomains;
+   Vector<int> refRatios;
+   Vector<Real> amrDx;
+   int finestLevel;
+
+   setupGrids(amrGrids, amrDomains, refRatios, amrDx, finestLevel);              // ... to create the domain and AMR blocks/boxes ???
+
+   // initialize solver
+   AMRMultiGrid<LevelData<FArrayBox> > *amrSolver;                               // Not a_amrSolver? Where is amrSolver defined?
+   if ( mg_type==0 )
+     {
+       amrSolver = new AMRMultiGrid<LevelData<FArrayBox> >();                    // ???
+     }
+   else
+     {
+       MayDay::Error("FAS not supported");
+       // int type = (int)VCYCLE;
+       // ParmParse ppSolver("solver");
+
+       // AMRFASMultiGrid<LevelData<FArrayBox> > *psol;
+       // psol = new AMRFASMultiGrid<LevelData<FArrayBox> >();
+       // ppSolver.query("cycle_type", type);
+       // psol->setCycleType( (FASMG_type)type );
+       // bool avoid_norms = false;
+       // ppSolver.query("avoid_norms", avoid_norms);
+       // psol->setAvoidNorms(avoid_norms);
+       // int numv=1;
+       // ppSolver.query("num_v_cycles", numv);
+       // psol->setNumVcycles(numv);
+       // amrSolver = psol;
+     }
+   BiCGStabSolver<LevelData<FArrayBox> > bottomSolver;                           // Still not clear on what the BiCGStabSolver does
+   bottomSolver.m_verbosity = s_verbosity-2;
+   setupSolver(amrSolver, bottomSolver, amrGrids, amrDomains,
+               refRatios, amrDx, finestLevel);
+
+
+   // allocate solution and RHS, initialize RHS
+   int numLevels = amrGrids.size();                                              // Set up containers
+   Vector<LevelData<FArrayBox>* > phi(numLevels, NULL);                          // \phi container
+   Vector<LevelData<FArrayBox>* > rhs(numLevels, NULL);                          // \rho container
+   // this is for convenience
+   Vector<LevelData<FArrayBox>* > resid(numLevels, NULL);                        // ??? residual calculation
+
+   for (int lev=0; lev<=finestLevel; lev++)                                      // Loop over all AMR levels
+     {
+       const DisjointBoxLayout& levelGrids = amrGrids[lev];                      // level dummy
+       phi[lev] = new LevelData<FArrayBox>(levelGrids, 1, IntVect::Unit);        // create space for \phi data for each level
+       rhs[lev] = new LevelData<FArrayBox>(levelGrids, 1, IntVect::Zero);        // create space for \rho date for each level
+       resid[lev] = new LevelData<FArrayBox>(levelGrids, 1, IntVect::Zero);      // create space for residual for each level
+     }
+
+   setRHS(rhs, amrDomains, refRatios, amrDx, finestLevel );                      // set the RHS, wasn't this done in the beginning already?
+
+   // do solve
+   int iterations = 1;
+   ppMain.get("iterations", iterations);                                         // ppMain = ???
+
+   for (int iiter = 0; iiter < iterations; iiter++)                              // interate over
+     {
+       bool zeroInitialGuess = true;
+       pout() << "about to go into solve" << endl;
+       amrSolver->solve(phi, rhs, finestLevel, 0, zeroInitialGuess);             // Here is where it is all put together
+       pout() << "done solve" << endl;
+     }
+
+   // write results to file
+
+/*
+*  This may be useful for testing an debugging purposes, but in the end,
+*  I would prefer to keep all the information in one place with the rest of
+*  the conserved/primative variables of PLUTO
+*
+*/
+
+   bool writePlots = true;
+   ppMain.query("writePlotFiles", writePlots);
+
+#ifdef CH_USE_HDF5
+
+   if (writePlots)
+     {
+       int numLevels = finestLevel +1;
+       Vector<LevelData<FArrayBox>* > plotData(numLevels, NULL);
+
+       pout() << "Write Plots. norm=" << amrSolver->computeAMRResidual(resid,phi,rhs,finestLevel,0) << endl;
+
+       for (int lev=0; lev<numLevels; lev++)
+         {
+           plotData[lev] = new LevelData<FArrayBox>(amrGrids[lev],
+                                                    3, IntVect::Zero);
+
+           Interval phiInterval(0,0);
+           phi[lev]->copyTo(phiInterval, *plotData[lev], phiInterval);
+           Interval rhsInterval(1,1);
+           rhs[lev]->copyTo(phiInterval, *plotData[lev], rhsInterval);
+           Interval resInterval(2,2);
+           resid[lev]->copyTo(phiInterval, *plotData[lev], resInterval);
+         }
+
+       string fname = "poissonOut.";
+
+       char suffix[30];
+       sprintf(suffix, "%dd.hdf5",SpaceDim);
+       fname += suffix;
+
+       Vector<string> varNames(3);
+       varNames[0] = "phi";
+       varNames[1] = "rhs";
+       varNames[2] = "res";
+
+       Real bogusVal = 1.0;
+
+       WriteAMRHierarchyHDF5(fname,
+                             amrGrids,
+                             plotData,
+                             varNames,
+                             amrDomains[0].domainBox(),
+                             amrDx[0],
+                             bogusVal,
+                             bogusVal,
+                             refRatios,
+                             numLevels);
+
+       // clean up
+       for (int lev=0; lev<plotData.size(); lev++)
+         {
+           delete plotData[lev];
+         }
+     } // end if writing plots
+#endif // end if HDF5
+
+   // clean up
+   for (int lev=0; lev<phi.size(); lev++)
+     {
+       delete phi[lev];
+       delete rhs[lev];
+       delete resid[lev];
+     }
+
+   delete amrSolver;
+
+   return status;
+}
 
 /* ********************************************************** */
 void solveSelfGravPot(Vector<LevelData<FArrayBox>* >& a_gravpot,       // Output self-gravity potential: m_gravpot
