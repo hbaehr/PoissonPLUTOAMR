@@ -212,7 +212,7 @@ void setRHS(Vector<LevelData<FArrayBox>* > a_rhs, // Output array of \rho
  {
    CH_TIME("setupSolver");                                                       // Timing diagnostic
 
-   ParmParse ppSolver("solver");                                                 // ??? WHere does ppSolver come from?
+   ParmParse ppSolver("solver");                                                 // ??? WHere does ppSolver come from? Parse parameter information from input files
 
    int numLevels = a_finestLevel+1;                                              // 0 index count of total levels
 
@@ -220,7 +220,7 @@ void setRHS(Vector<LevelData<FArrayBox>* > a_rhs, // Output array of \rho
 
    // solving poisson problem here
    Real alpha =0.0;                                                              // Constants which determine form of the Poisson equation
-   Real beta = 1.0;                                                              // \beta will be 1/(4*\pi*G)
+   Real beta = 1.0;                                                              // \beta will be 1/(4*\pi*G) in cgs or code units?
 
    opFactory.define(a_domain[0],                                                 // Define the parameters that go into each instance of opFactory
                     a_grids,
@@ -230,13 +230,13 @@ void setRHS(Vector<LevelData<FArrayBox>* > a_rhs, // Output array of \rho
 
    AMRLevelOpFactory<LevelData<FArrayBox> >& castFact = (AMRLevelOpFactory<LevelData<FArrayBox> >& ) opFactory;  // ??? dummy?
 
-   a_amrSolver->define(a_domain[0], castFact,                                    // The solver?
+   a_amrSolver->define(a_domain[0], castFact,                                    // Define
                       &a_bottomSolver, numLevels);
 
    // multigrid solver parameters                                                // Parameters for solving over multiple levels ???
-   int numSmooth, numMG, maxIter;
-   Real eps, hang;
-   ppSolver.get("num_smooth", numSmooth);
+   int numSmooth, numMG, maxIter;                                                // So ParmParse look into the 'inputs' file and for in the instance
+   Real eps, hang;                                                               // ppSolver, extracts all values on lines which start with 'solver.'
+   ppSolver.get("num_smooth", numSmooth);                                        // and returns the values for the respective variable names
    ppSolver.get("num_mg",     numMG);
    ppSolver.get("max_iterations", maxIter);
    ppSolver.get("tolerance", eps);
