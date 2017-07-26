@@ -83,7 +83,7 @@ enum probTypes {zeroRHS = 0,
 
 //int s_probtype = zeroRHS;
 //int s_probtype = sinusoidal;
-int s_probtype = gaussians;
+int s_probtype = gaussians;                                                      // defines the distribution of the RHS
 
 //  -----------------------------------------
 // boundary condition stuff                                                      // Are these boundary conditions between AMR levels or for the entire domain?
@@ -94,13 +94,13 @@ int s_probtype = gaussians;
 class GlobalBCRS
 {
 public:
-  static std::vector<bool> s_printedThatLo, s_printedThatHi;
-  static std::vector<int> s_bcLo, s_bcHi;
+  static std::vector<bool> s_printedThatLo, s_printedThatHi;                     // ???
+  static std::vector<int> s_bcLo, s_bcHi;                                        // Lo and Hi refer to what exactly?
   static RealVect s_trigvec;
   static bool s_areBCsParsed, s_valueParsed, s_trigParsed;
 };
 
-std::vector<bool> GlobalBCRS::s_printedThatLo = std::vector<bool>(SpaceDim, false);
+std::vector<bool> GlobalBCRS::s_printedThatLo = std::vector<bool>(SpaceDim, false); // vector<bool> is ???
 std::vector<bool> GlobalBCRS::s_printedThatHi = std::vector<bool>(SpaceDim, false);
 std::vector<int>  GlobalBCRS::s_bcLo = std::vector<int>();
 std::vector<int>  GlobalBCRS::s_bcHi = std::vector<int>();
@@ -109,7 +109,7 @@ bool              GlobalBCRS::s_areBCsParsed= false;
 bool              GlobalBCRS::s_valueParsed= false;
 bool              GlobalBCRS::s_trigParsed= false;
 
-void ParseValue(Real* pos,
+void ParseValue(Real* pos,                                                       // Looks like this would normally parse a BC value from a file
                 int* dir,
                 Side::LoHiSide* side,
                 Real* a_values)
@@ -120,14 +120,14 @@ void ParseValue(Real* pos,
   a_values[0]=0.;
 }
 
-void ParseBC(FArrayBox& a_state,
-             const Box& a_valid,
-             const ProblemDomain& a_domain,
-             Real a_dx,
-             bool a_homogeneous)
+void ParseBC(FArrayBox& a_state,                                                 // This might be where I have to make some notable changes: what is a_state?
+             const Box& a_valid,                                                 // a_valid is ...?
+             const ProblemDomain& a_domain,                                      // This is the global domain
+             Real a_dx,                                                          // without grid data is this just the coarse dx
+             bool a_homogeneous)                                                 // Does this say something about the distribution? Likely FALSE, no?
 {
 
-  if (!a_domain.domainBox().contains(a_state.box()))
+  if (!a_domain.domainBox().contains(a_state.box()))                             // ! returns the logical negation of expression (if expr=T, !expr=F)
     {
 
       // if (!GlobalBCRS::s_areBCsParsed)
@@ -138,13 +138,13 @@ void ParseBC(FArrayBox& a_state,
       //     GlobalBCRS::s_areBCsParsed = true;
       //   }
 
-      Box valid = a_valid;
-      for (int i=0; i<CH_SPACEDIM; ++i)
+      Box valid = a_valid;                                                       // again ??? Box valid is?
+      for (int i=0; i<CH_SPACEDIM; ++i)                                          // CH_SPACEDIM = 3?
         {
           // don't do anything if periodic
-          if (!a_domain.isPeriodic(i))
+          if (!a_domain.isPeriodic(i))                                           // So when not periodic (in i direction) do the following
             {
-              Box ghostBoxLo = adjCellBox(valid, i, Side::Lo, 1);
+              Box ghostBoxLo = adjCellBox(valid, i, Side::Lo, 1);                // One ghost cell on either side in each direction? Solver is 1st order so it makes sense
               Box ghostBoxHi = adjCellBox(valid, i, Side::Hi, 1);
               if (!a_domain.domainBox().contains(ghostBoxLo))
                 {
@@ -178,14 +178,14 @@ void ParseBC(FArrayBox& a_state,
                   //         GlobalBCRS::s_printedThatLo[i] = true;
                   //         if (s_verbosity>5)pout() << "const diri bcs lo for direction " << i << endl;
                   //       }
-                      DiriBC(a_state,
-                             valid,
-                             a_dx,
-                             true,
-                             ParseValue,
-                             i,
-                             Side::Lo,
-                             1);
+                      DiriBC(a_state,                                            // Check documentation for the Dirichlet BC
+                             valid,                                              // validity = consistency check?
+                             a_dx,                                               // explanatory
+                             true,                                               // Heh?
+                             ParseValue,                                         // ???
+                             i,                                                  // ???
+                             Side::Lo,                                           
+                             1);                                                 // ???
                   //   }
                   // else
                   //   {
