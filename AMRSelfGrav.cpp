@@ -82,39 +82,39 @@ static void enableFpExceptions();
 *
 *  I will include it for now for completeness and perhaps testing purposes
 */
-void setRHS(Vector<LevelData<FArrayBox>* > a_rhs, // Output array of \rho
-            Vector<ProblemDomain>& a_domain,      // Grid domain
-            Vector<int>& m_ref_ratio,             // Refinement ratios between levels
-            Vector<Real>& a_dx,                   // *** dx: not sure what this value is atm
-            int a_finestLevel)                    // *** number of most refined level
+void setRHS(Vector<LevelData<FArrayBox>* > a_rhs,                                // Output array of \rho
+            Vector<ProblemDomain>& a_domain,                                     // Grid domain
+            Vector<int>& m_ref_ratio,                                            // Refinement ratios between levels
+            Vector<Real>& a_dx,                                                  // *** dx: not sure what this value is atm
+            int a_finestLevel)                                                   // *** number of most refined level
 {
   CH_TIME("setRHS");
 
-  for (int lev=0; lev<=a_finestLevel; lev++)      // Looping over all levels
+  for (int lev=0; lev<=a_finestLevel; lev++)                                     // Looping over all levels
     {
-      LevelData<FArrayBox>& levelRhs = *(a_rhs[lev]);                      // Each a_rhs[lev] is an FArrayBox temporarily stored as levelRhs
-      const DisjointBoxLayout& levelGrids = levelRhs.getBoxes();           // Get box indeces for each level
+      LevelData<FArrayBox>& levelRhs = *(a_rhs[lev]);                            // Each a_rhs[lev] is an FArrayBox temporarily stored as levelRhs
+      const DisjointBoxLayout& levelGrids = levelRhs.getBoxes();                 // Get box indeces for each level
 
       // rhs is cell-centered...
-      RealVect ccOffset = 0.5*a_amrDx[lev]*RealVect::Unit;                 // Adjust for the cell-centered location of the data ???
+      RealVect ccOffset = 0.5*a_amrDx[lev]*RealVect::Unit;                       // Adjust for the cell-centered location of the data ???
 
-      DataIterator levelDit = levelGrids.dataIterator();                   // Write data to a level
-      for (levelDit.begin(); levelDit.ok(); ++levelDit)                    // Iterate over all points on the level?
+      DataIterator levelDit = levelGrids.dataIterator();                         // Write data to a level
+      for (levelDit.begin(); levelDit.ok(); ++levelDit)                          // Iterate over all points on the level?
         {
-          FArrayBox& thisRhs = levelRhs[levelDit];                         // Dummy thisRhs for the iteration of this loop
+          FArrayBox& thisRhs = levelRhs[levelDit];                               // Dummy thisRhs for the iteration of this loop
 
-          if (s_probtype == zeroRHS)                                       // Various patterns for the distribution of RHS
+          if (s_probtype == zeroRHS)                                             // Various patterns for the distribution of RHS
             {
-              thisRhs.setVal(0.0);                                         // 0 everywhere
+              thisRhs.setVal(0.0);                                               // 0 everywhere
             }
           else if (s_probtype == unityRHS)
             {
-              thisRhs.setVal(1.0);                                         // 1 everywhere
+              thisRhs.setVal(1.0);                                               // 1 everywhere
             }
           else if (s_probtype == sinusoidal)
             {
 
-              BoxIterator bit(thisRhs.box());                              // Sine wave
+              BoxIterator bit(thisRhs.box());                                    // Sine wave
               for (bit.begin(); bit.ok(); ++bit)
                 {
                   IntVect iv = bit();
@@ -132,7 +132,7 @@ void setRHS(Vector<LevelData<FArrayBox>* > a_rhs, // Output array of \rho
             }
           else if (s_probtype == gaussians)
             {
-              int numGaussians = 3;                                        // Gaussian distributions
+              int numGaussians = 3;                                              // Gaussian distributions
               Vector<RealVect> center(numGaussians,RealVect::Zero);
               Vector<Real> scale(numGaussians, 1.0);
               Vector<Real> strength(numGaussians, 1.0);
@@ -207,7 +207,7 @@ void setRHS(Vector<LevelData<FArrayBox>* > a_rhs, // Output array of \rho
              const Vector<DisjointBoxLayout>& a_grids,                           // Grids for each AMR level
              const Vector<ProblemDomain>& a_domain,                              // Entire domain
              const Vector<int>& a_ref_ratio,                                     // Refinement ratios between levels
-             const Vector<Real>& a_dx,                                        // *** dx: not sure what this value is atm
+             const Vector<Real>& a_dx,                                           // *** dx: not sure what this value is atm
              int a_finestLevel)                                                  // *** number of most refined level
  {
    CH_TIME("setupSolver");                                                       // Timing diagnostic
@@ -263,7 +263,7 @@ void setRHS(Vector<LevelData<FArrayBox>* > a_rhs, // Output array of \rho
    ppMain.query("verbosity", s_verbosity);                                       // Noisiness control ???
 
    // set up grids&
-   Vector<DisjointBoxLayout> grids;                                           // define non-temporary structures ... ???
+   Vector<DisjointBoxLayout> grids;                                              // define non-temporary structures ... ???
    Vector<ProblemDomain> domain;
    Vector<int> ref_ratio;
    Vector<Real> dx;
@@ -316,7 +316,7 @@ void setRHS(Vector<LevelData<FArrayBox>* > a_rhs, // Output array of \rho
        resid[lev] = new LevelData<FArrayBox>(levelGrids, 1, IntVect::Zero);      // create space for residual for each level
      }
 
-   setRHS(rhs, domain, ref_ratio, dx, finestLevel );                      // set the RHS, wasn't this done in the beginning already?
+   setRHS(rhs, domain, ref_ratio, dx, finestLevel );                             // set the RHS, wasn't this done in the beginning already?
 
    // do solve
    int iterations = 1;
