@@ -73,6 +73,17 @@ static void enableFpExceptions();
 // 2) Initial conditions
 // 2) Fill the ghost zones of m_gravpot or a_gravpot by interpolation? see LevelPluto for more info
 
+/*
+* A few notes:
+* m_ indicates a temporary storage structure and should be used within routines
+*    and re-used each timestep
+*
+* a_ indicates the main which stores data between timesteps 
+*
+*
+*
+*/
+
 int s_verbosity = 1;
 
 enum probTypes {zeroRHS = 0,
@@ -184,7 +195,7 @@ void ParseBC(FArrayBox& a_state,                                                
                              true,                                               // Heh?
                              ParseValue,                                         // ???
                              i,                                                  // ???
-                             Side::Lo,                                           
+                             Side::Lo,
                              1);                                                 // ???
                   //   }
                   // else
