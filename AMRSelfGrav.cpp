@@ -78,7 +78,7 @@ static void enableFpExceptions();
 * m_ indicates a temporary storage structure and should be used within routines
 *    and re-used each timestep
 *
-* a_ indicates the main which stores data between timesteps 
+* a_ indicates the main which stores data between timesteps
 *
 *
 *
@@ -256,10 +256,10 @@ void ParseBC(FArrayBox& a_state,                                                
 }
 
 //#ifdef FAS_HACKS
-#if 0
-////////////////////////////////////////////////////////////////////////
-// DampBC helper
-////////////////////////////////////////////////////////////////////////
+#if 0;
+/***********************************************************************
+   DampBC helper
+***********************************************************************/
 static void DampDiriBC( FArrayBox&      a_state,
                         const Box&      a_valid,
                         const ProblemDomain& a_domain,
@@ -288,9 +288,9 @@ static void DampDiriBC( FArrayBox&      a_state,
         }
     }
 }
-////////////////////////////////////////////////////////////////////////
-// DampBC -- method to damp (residual) at Dirchlet BCs
-////////////////////////////////////////////////////////////////////////
+/***********************************************************************
+   DampBC -- method to damp (residual) at Dirchlet BCs
+***********************************************************************/
 void DampBC( FArrayBox& a_state,
              const Box& a_valid,
              const ProblemDomain& a_domain,
@@ -343,9 +343,9 @@ void DampBC( FArrayBox& a_state,
     }
 }
 
-////////////////////////////////////////////////////////////////////////
-// convergeGS_BC helper
-////////////////////////////////////////////////////////////////////////
+/***********************************************************************
+   convergeGS_BC helper
+***********************************************************************/
 extern void convDiriBC_RBGS( FArrayBox&      a_state,
                              const FArrayBox& a_rhs,
                              const Box&      a_valid,
@@ -355,9 +355,9 @@ extern void convDiriBC_RBGS( FArrayBox&      a_state,
                              int             a_dir,
                              Side::LoHiSide  a_side);
 
-////////////////////////////////////////////////////////////////////////
-// convergeGS_BC -- method to converge G-S on Dirchlet BCs
-////////////////////////////////////////////////////////////////////////
+/***********************************************************************
+   convergeGS_BC -- method to converge G-S on Dirchlet BCs
+***********************************************************************/
 void convergeGS_BC( FArrayBox& a_state,
                     const FArrayBox& a_rhs,
                     const Box& a_valid,
@@ -441,9 +441,9 @@ void convergeGS_BC( FArrayBox& a_state,
 }
 #endif
 
-// ----------------------------------------
-// end BC stuff
-// ----------------------------------------
+/***********************************************************************
+   end BC stuff
+***********************************************************************/
 
 /* Set the right hand side of Poisson equation
 *  \nabla \Phi = 4*\pi*G*\rho
