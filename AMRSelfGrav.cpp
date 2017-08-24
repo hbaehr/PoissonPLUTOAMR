@@ -668,8 +668,8 @@ void setRHS(Vector<LevelData<FArrayBox>* > a_rhs,                               
        // psol->setNumVcycles(numv);
        // amrSolver = psol;
      }
-   BiCGStabSolver<LevelData<FArrayBox> > bottomSolver;                           // Still not clear on what the BiCGStabSolver does
-   bottomSolver.m_verbosity = s_verbosity-2;
+   BiCGStabSolver<LevelData<FArrayBox> > bottomSolver;                           // So a v-cycle needs a direct solver
+   bottomSolver.m_verbosity = s_verbosity-2;                                     // on the coarsest level 
    setupSolver(amrSolver, bottomSolver, amrGrids, amrDomains,
                refRatios, amrDx, finestLevel);
 
@@ -818,7 +818,7 @@ opFactory.define(m_domain,
 //this is the solver we shall use
 AMRMultiGrid<LevelData<FArrayBox> > solver;
 
-//this is the solver for the bottom of the muligrid v-cycle (???)
+//this is the solver for the bottom of the muligrid v-cycle (So this is the solver on the coarsest grid?)
 BiCGStabSolver<LevelData<FArrayBox> > bottomSolver;
 
 //bicgstab can be noisy
