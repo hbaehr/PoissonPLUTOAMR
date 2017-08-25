@@ -86,7 +86,7 @@ static void enableFpExceptions();
 
 int s_verbosity = 1;
 
-enum probTypes {zeroRHS = 0,
+enum probTypes {zeroRHS = 0,                                                     // List of the various initial conditions (ICs) available
                 unityRHS,
                 sinusoidal,
                 gaussians,
@@ -102,17 +102,17 @@ int s_probtype = gaussians;                                                     
 ///
 /**
  */
-class GlobalBCRS
+class GlobalBCRS                                                                 // Is there any documentation on GlobalBCRS?
 {
 public:
-  static std::vector<bool> s_printedThatLo, s_printedThatHi;                     // ???
+  static std::vector<bool> s_printedThatLo, s_printedThatHi;                     // why bool?
   static std::vector<int> s_bcLo, s_bcHi;                                        // Lo and Hi refer to what exactly?
   static RealVect s_trigvec;
   static bool s_areBCsParsed, s_valueParsed, s_trigParsed;
 };
 
 std::vector<bool> GlobalBCRS::s_printedThatLo = std::vector<bool>(SpaceDim, false); // vector<bool> is ???
-std::vector<bool> GlobalBCRS::s_printedThatHi = std::vector<bool>(SpaceDim, false);
+std::vector<bool> GlobalBCRS::s_printedThatHi = std::vector<bool>(SpaceDim, false); //
 std::vector<int>  GlobalBCRS::s_bcLo = std::vector<int>();
 std::vector<int>  GlobalBCRS::s_bcHi = std::vector<int>();
 RealVect          GlobalBCRS::s_trigvec = RealVect::Zero;
@@ -120,10 +120,10 @@ bool              GlobalBCRS::s_areBCsParsed= false;
 bool              GlobalBCRS::s_valueParsed= false;
 bool              GlobalBCRS::s_trigParsed= false;
 
-void ParseValue(Real* pos,                                                       // Looks like this would normally parse a BC value from a file
-                int* dir,
-                Side::LoHiSide* side,
-                Real* a_values)
+void ParseValue(Real* pos,                                                       // Looks like this would normally parse a BC value settings from a file
+                int* dir,                                                        // dir = direction? as in dimension 1,2,3?
+                Side::LoHiSide* side,                                            // Which side of the coordinate boundary?
+                Real* a_values)                                                  // ???
 {
   //  ParmParse pp;
   //Real bcVal;
@@ -131,11 +131,11 @@ void ParseValue(Real* pos,                                                      
   a_values[0]=0.;
 }
 
-void ParseBC(FArrayBox& a_state,                                                 // This might be where I have to make some notable changes: what is a_state?
-             const Box& a_valid,                                                 // a_valid is ...?
-             const ProblemDomain& a_domain,                                      // This is the global domain
+void ParseBC(FArrayBox& a_state,                                                 // See documentation for BCfunction. State is the value of Phi within box
+             const Box& a_valid,                                                 // domain of the box (might be a subdomain?) around which the BCs are 'built'
+             const ProblemDomain& a_domain,                                      // This is the coarsest domain
              Real a_dx,                                                          // without grid data is this just the coarse dx
-             bool a_homogeneous)                                                 // Does this say something about the distribution? Likely FALSE, no?
+             bool a_homogeneous)                                                 // If true, ghost values are computed for a homogenous boundary condition
 {
 
   if (!a_domain.domainBox().contains(a_state.box()))                             // ! returns the logical negation of expression (if expr=T, !expr=F)
@@ -149,7 +149,7 @@ void ParseBC(FArrayBox& a_state,                                                
       //     GlobalBCRS::s_areBCsParsed = true;
       //   }
 
-      Box valid = a_valid;                                                       // again ??? Box valid is?
+      Box valid = a_valid;                                                       // subdomain(?) around which the BCs are constructed
       for (int i=0; i<CH_SPACEDIM; ++i)                                          // CH_SPACEDIM = 3?
         {
           // don't do anything if periodic
@@ -157,7 +157,7 @@ void ParseBC(FArrayBox& a_state,                                                
             {
               Box ghostBoxLo = adjCellBox(valid, i, Side::Lo, 1);                // One ghost cell on either side in each direction? Solver is 1st order so it makes sense
               Box ghostBoxHi = adjCellBox(valid, i, Side::Hi, 1);
-              if (!a_domain.domainBox().contains(ghostBoxLo))
+              if (!a_domain.domainBox().contains(ghostBoxLo))                    // If there are no ghost cells on the Lo side?
                 {
                   // if (GlobalBCRS::s_bcLo[i] == 1)
                   //   {
@@ -188,14 +188,14 @@ void ParseBC(FArrayBox& a_state,                                                
                   //           }
                   //         GlobalBCRS::s_printedThatLo[i] = true;
                   //         if (s_verbosity>5)pout() << "const diri bcs lo for direction " << i << endl;
-                  //       }
-                      DiriBC(a_state,                                            // Check documentation for the Dirichlet BC
-                             valid,                                              // validity = consistency check?
+                  //       }                                                     // ... then apply Dirichlet BCs. But from where does this come?
+                      DiriBC(a_state,                                            // phi values with in box valid
+                             valid,                                              // subdomain box
                              a_dx,                                               // explanatory
                              true,                                               // Heh?
                              ParseValue,                                         // ???
                              i,                                                  // ???
-                             Side::Lo,
+                             Side::Lo,                                           // Lo boundary
                              1);                                                 // ???
                   //   }
                   // else
@@ -204,7 +204,7 @@ void ParseBC(FArrayBox& a_state,                                                
                   //   }
                 }
 
-              if (!a_domain.domainBox().contains(ghostBoxHi))
+              if (!a_domain.domainBox().contains(ghostBoxHi))                    // So if domainBox contains no ghost cells on the Hi end?
                 {
                   // if (GlobalBCRS::s_bcHi[i] == 1)
                   //   {
@@ -258,26 +258,26 @@ void ParseBC(FArrayBox& a_state,                                                
 //#ifdef FAS_HACKS
 #if 0
 /***********************************************************************
-   DampBC helper
-***********************************************************************/
-static void DampDiriBC( FArrayBox&      a_state,
-                        const Box&      a_valid,
-                        const ProblemDomain& a_domain,
-                        int             a_ratio,
-                        int             a_dir,
-                        Side::LoHiSide  a_side,
-                        Interval&       a_interval
+   DampBC helper                                                                 // Reminder: Dirichlet conditions mean u=c at boundary, rather than du/dx=c
+***********************************************************************/         // Everything beyond here still functions but this editor is weird
+static void DampDiriBC( FArrayBox&      a_state,                                 // State is the value of \phi with in the box a_valid
+                        const Box&      a_valid,                                 // Box around which BCs are constructed
+                        const ProblemDomain& a_domain,                           // Coarsest grid domain
+                        int             a_ratio,                                 // grid refinement ratio
+                        int             a_dir,                                   // ???
+                        Side::LoHiSide  a_side,                                  // Which side of the domain?
+                        Interval&       a_interval                               // ???
                         )
 {
-  Real dc = 1.0, df = dc/(Real)a_ratio;
-  for (int kk=1 ; kk <= 2 ; kk++, df += 1., dc += 1. )
+  Real dc = 1.0, df = dc/(Real)a_ratio;                                          // ratio = 2, but what is (Real) doing there?
+  for (int kk=1 ; kk <= 2 ; kk++, df += 1., dc += 1. )                           // wait so kk goes from 1 to 2 in increments of 1? df and dc increment by 1 as well?
     {
-      Real fact = df/dc;
+      Real fact = df/dc;                                                         // factor(?) = df/dc
 
-      Box region = adjCellBox( a_valid, a_dir, a_side, 1 );
-      region.shift( a_dir, -kk*sign(a_side) );
+      Box region = adjCellBox( a_valid, a_dir, a_side, 1 );                      // adjCellBox = ???
+      region.shift( a_dir, -kk*sign(a_side) );                                   // How does this 'shift' work?
 
-      for (BoxIterator bit(region); bit.ok(); ++bit)
+      for (BoxIterator bit(region); bit.ok(); ++bit)                             // Doing something over the 'region' but not sure what
         {
           const IntVect& ivTo = bit();
           for (int icomp = a_interval.begin(); icomp <= a_interval.end(); icomp++)
@@ -291,29 +291,29 @@ static void DampDiriBC( FArrayBox&      a_state,
 /***********************************************************************
    DampBC -- method to damp (residual) at Dirchlet BCs
 ***********************************************************************/
-void DampBC( FArrayBox& a_state,
+void DampBC( FArrayBox& a_state,                                                 // See above for arguments
              const Box& a_valid,
              const ProblemDomain& a_domain,
              Real a_dx,
              int a_ratio )
 {
 
-  if (!a_domain.domainBox().contains(a_state.box()))
+  if (!a_domain.domainBox().contains(a_state.box()))                             // If domain box does not contain a state box
     {
       if (!GlobalBCRS::s_areBCsParsed)
         {
           ParmParse pp;
-          pp.getarr("bc_lo", GlobalBCRS::s_bcLo, 0, SpaceDim);
+          pp.getarr("bc_lo", GlobalBCRS::s_bcLo, 0, SpaceDim);                   // Get argument from file
           pp.getarr("bc_hi", GlobalBCRS::s_bcHi, 0, SpaceDim);
           GlobalBCRS::s_areBCsParsed = true;
         }
 
-      for (int i=0; i<CH_SPACEDIM; ++i)
+      for (int i=0; i<CH_SPACEDIM; ++i)                                          // increment over all spatial dimensions
         {
           // don't do anything if periodic
-          if (!a_domain.isPeriodic(i))
+          if (!a_domain.isPeriodic(i))                                           // Does nothing if periodic in ith direction
             {
-              Box valid = a_valid;
+              Box valid = a_valid;                                               // Similar to above
               Box ghostBoxLo = adjCellBox(valid, i, Side::Lo, 1);
               Box ghostBoxHi = adjCellBox(valid, i, Side::Hi, 1);
               if ( !a_domain.domainBox().contains(ghostBoxLo) && GlobalBCRS::s_bcLo[i]==0 )
@@ -351,22 +351,22 @@ extern void convDiriBC_RBGS( FArrayBox&      a_state,
                              const Box&      a_valid,
                              const ProblemDomain& a_domain,
                              Real a_dx,
-                             int             a_whichpass,
+                             int             a_whichpass,                        // ??? Which part of the v-cycle one is in?
                              int             a_dir,
                              Side::LoHiSide  a_side);
 
 /***********************************************************************
-   convergeGS_BC -- method to converge G-S on Dirchlet BCs
+   convergeGS_BC -- method to converge G-S on Dirchlet BCs                       // G-S = Gauss-Seidel method?
 ***********************************************************************/
 void convergeGS_BC( FArrayBox& a_state,
                     const FArrayBox& a_rhs,
                     const Box& a_valid,
                     const ProblemDomain& a_domain,
                     Real a_dx,
-                    int a_whichpass )
+                    int a_whichpass )                                            // See above
 {
 
-  if (!a_domain.domainBox().contains(a_state.box()))
+  if (!a_domain.domainBox().contains(a_state.box()))                             // Do nothing if there is no a_state?
     {
       if (!GlobalBCRS::s_areBCsParsed)
         {
@@ -449,13 +449,13 @@ void convergeGS_BC( FArrayBox& a_state,
 *  \nabla \Phi = 4*\pi*G*\rho
 *
 *  Since everything on the RHS outside of \rho is constant, these are put into
-*  the constant value b. However, since \rho has already been calculate in the
-*  previous step, it might be unnecessary to do this step.
+*  the constant value b. The trick will be getting the right values from the
+*  a_U or m_U arrays
 *
-*  I will include it for now for completeness and perhaps testing purposes
+*
 */
 
-void setRHS(Vector<LevelData<FArrayBox>* > a_rhs,                                // Output array of \rho
+void setRHS(Vector<LevelData<FArrayBox>* > a_rhs,                                // Output array of \rho: a_U[RHO]?
             Vector<ProblemDomain>& a_domain,                                     // Grid domain
             Vector<int>& m_ref_ratio,                                            // Refinement ratios between levels
             Vector<Real>& a_dx,                                                  // *** dx: not sure what this value is atm
@@ -536,9 +536,9 @@ void setRHS(Vector<LevelData<FArrayBox>* > a_rhs,                               
                     }
                 }
 
-              thisRhs.setVal(0.0);
-
-              BoxIterator bit(thisRhs.box());
+              thisRhs.setVal(0.0);                                               // Everything up to here is clear - setting up the Gaussian distributions
+                                                                                 // but is this where one needs to start 'placing' the numbers
+              BoxIterator bit(thisRhs.box());                                    // on the grid? YES See the sine wave IC for an easier example
               for (bit.begin(); bit.ok(); ++bit)
                 {
                   IntVect iv = bit();
@@ -615,8 +615,8 @@ void setRHS(Vector<LevelData<FArrayBox>* > a_rhs,                               
    ppSolver.get("tolerance", eps);
    ppSolver.get("hang",      hang);
 
-   Real normThresh = 1.0e-30;
-   a_amrSolver->setSolverParameters(numSmooth, numSmooth, numSmooth,
+   Real normThresh = 1.0e-30;                                                    // What is this threshold?
+   a_amrSolver->setSolverParameters(numSmooth, numSmooth, numSmooth,             // Input all the parameters
                                 numMG, maxIter, eps, hang, normThresh);
    a_amrSolver->m_verbosity = s_verbosity-1;
 
@@ -668,8 +668,8 @@ void setRHS(Vector<LevelData<FArrayBox>* > a_rhs,                               
        // psol->setNumVcycles(numv);
        // amrSolver = psol;
      }
-   BiCGStabSolver<LevelData<FArrayBox> > bottomSolver;                           // So a v-cycle needs a direct solver
-   bottomSolver.m_verbosity = s_verbosity-2;                                     // on the coarsest level 
+   BiCGStabSolver<LevelData<FArrayBox> > bottomSolver;                           // So a v-cycle needs a direct solver on the coarsest level
+   bottomSolver.m_verbosity = s_verbosity-2;
    setupSolver(amrSolver, bottomSolver, amrGrids, amrDomains,
                refRatios, amrDx, finestLevel);
 
