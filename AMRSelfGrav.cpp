@@ -71,7 +71,8 @@ static void enableFpExceptions();
 // Other things which need to be addressed:
 // 1) Boundary conditions
 // 2) Initial conditions
-// 2) Fill the ghost zones of m_gravpot or a_gravpot by interpolation? see LevelPluto for more info
+// 3) Fill the ghost zones of m_gravpot or a_gravpot by interpolation? see LevelPluto for more info
+// 4) Go through each input from PLUTO and decide whether they should be  temporary 'm_' or permanent 'a_' for now they are all 'a_'
 
 /*
 * A few notes:
@@ -85,16 +86,6 @@ static void enableFpExceptions();
 */
 
 int s_verbosity = 1;
-
-enum probTypes {zeroRHS = 0,                                                     // List of the various initial conditions (ICs) available
-                unityRHS,
-                sinusoidal,
-                gaussians,
-                numProbTypes};
-
-//int s_probtype = zeroRHS;
-//int s_probtype = sinusoidal;
-int s_probtype = gaussians;                                                      // defines the distribution of the RHS
 
 //  -----------------------------------------
 // boundary condition stuff                                                      // Are these boundary conditions between AMR levels or for the entire domain?
@@ -459,7 +450,7 @@ void setRHS(Vector<LevelData<FArrayBox>* > a_rhs,                               
             Vector<ProblemDomain>& a_domain,                                     // Grid domain
             Vector<int>& m_ref_ratio,                                            // Refinement ratios between levels
             Vector<Real>& a_dx,                                                  // *** dx: not sure what this value is atm
-            int a_finestLevel)                                                   // *** number of most refined level
+            int a_finestLevel)                                                   // *** number of most refined level = len(m_level)
 {
   CH_TIME("setRHS");
 
@@ -475,66 +466,6 @@ void setRHS(Vector<LevelData<FArrayBox>* > a_rhs,                               
       for (levelDit.begin(); levelDit.ok(); ++levelDit)                          // Iterate over all points on the level?
         {
           FArrayBox& thisRhs = levelRhs[levelDit];                               // Dummy thisRhs for the iteration of this loop
-
-          if (s_probtype == zeroRHS)                                             // Various patterns for the distribution of RHS
-            {
-              thisRhs.setVal(0.0);                                               // 0 everywhere
-            }
-          else if (s_probtype == unityRHS)
-            {
-              thisRhs.setVal(1.0);                                               // 1 everywhere
-            }
-          else if (s_probtype == sinusoidal)
-            {
-
-              BoxIterator bit(thisRhs.box());                                    // Sine wave
-              for (bit.begin(); bit.ok(); ++bit)
-                {
-                  IntVect iv = bit();
-                  RealVect loc(iv);
-                  loc *= a_amrDx[lev];
-                  loc += ccOffset;
-                  loc *= 2.0*Pi;
-
-                  thisRhs(iv,0) = D_TERM(sin(loc[0]),
-                                         *cos(loc[1]),
-                                         *sin(loc[2]));
-
-                 }
-
-            }
-          else if (s_probtype == gaussians)
-            {
-              int numGaussians = 3;                                              // Gaussian distributions
-              Vector<RealVect> center(numGaussians,RealVect::Zero);
-              Vector<Real> scale(numGaussians, 1.0);
-              Vector<Real> strength(numGaussians, 1.0);
-
-              for (int n=0; n<numGaussians; n++)
-                {
-                  if (n==0)
-                    {
-                      strength[0] = 1.0;
-                      scale[0] = 1.0e-2;
-                      center[0] = 0.25*RealVect::Unit;
-                    }
-                  else if (n == 1)
-                    {
-                      strength[1] = 3.0;
-                      scale[1] = 1.0e-2;
-                      center[1] = RealVect(D_DECL(0.5,0.75, 0.75));
-                    }
-                  else if (n == 2)
-                    {
-                      strength[2] = 2.0;
-                      scale[2] = 1.0e-2;
-                      center[2] = RealVect(D_DECL(0.75,0.5, 0.5));
-                    }
-                  else
-                    {
-                      MayDay::Error("too many Gaussian sources attempted");
-                    }
-                }
 
               thisRhs.setVal(0.0);                                               // Everything up to here is clear - setting up the Gaussian distributions
                                                                                  // but is this where one needs to start 'placing' the numbers
@@ -558,19 +489,15 @@ void setRHS(Vector<LevelData<FArrayBox>* > a_rhs,                               
                      }
                  }
              }
-           else
-             {
-               MayDay::Error("undefined problem type");
-             }
          } // end loop over grids on this level
      } // end loop over levels
  }
 
 
-void setupGrids(Vector<DisjointBoxLayout>& a_amrGrids,                           // uncertain whether I will need to setup my own grid, but
-            Vector<ProblemDomain>& a_amrDomains,                                 // this will be good for completeness sake
-            Vector<int>& a_refRatios,
-            Vector<Real>& a_amrDx,
+void setupGrids(Vector<DisjointBoxLayout>& a_grids,                           // uncertain whether I will need to setup my own grid, but
+            Vector<ProblemDomain>& a_domains,                                 // this will be good for completeness sake
+            Vector<int>& a_ref_ratio,
+            Vector<Real>& a_dx,
             int& a_finestLevel)
 {
    CH_TIME("setupGrids");
@@ -619,26 +546,28 @@ void setupGrids(Vector<DisjointBoxLayout>& a_amrGrids,                          
 
    // resize dataholders
    int maxNumLevels = maxLevel +1;
-   a_amrGrids.resize(maxNumLevels);
-   a_amrDomains.resize(maxNumLevels);
-   a_amrDx.resize(maxNumLevels,-1);
+   a_grids.resize(maxNumLevels);
+   a_domain.resize(maxNumLevels);
+   a_dx.resize(maxNumLevels,-1);
    a_finestLevel = 0;
 
    // assumes dx=dy=dz
-   a_amrDx[0] = domainSize[0]/numCells[0];
+   a_dx[0] = domainSize[0]/numCells[0];
+   a_dx[1] = domainSize[1]/numCells[1];
+   a_dx[2] = domainSize[2]/numCells[2];
 
    IntVect domLo = IntVect::Zero;
    IntVect domHi  = numCells - IntVect::Unit;
 
    ProblemDomain baseDomain(domLo, domHi, is_periodic);
-   a_amrDomains[0] = baseDomain;
+   a_domain[0] = baseDomain;
 
    // set up refined domains, etc
    for (int lev=1; lev<= maxLevel; lev++)
      {
-       a_amrDomains[lev] = a_amrDomains[lev-1];
-       a_amrDomains[lev].refine(a_refRatios[lev-1]);
-       a_amrDx[lev] = a_amrDx[lev-1]/a_refRatios[lev-1];
+       a_domain[lev] = a_domain[lev-1];
+       a_domain[lev].refine(a_refRatios[lev-1]);
+       a_dx[lev] = a_dx[lev-1]/a_ref ratio[lev-1];
      }
 
    Vector<Vector<Box> > vectBoxes(maxLevel+1);
@@ -656,7 +585,7 @@ void setupGrids(Vector<DisjointBoxLayout>& a_amrGrids,                          
 
      DisjointBoxLayout baseGrids(vectBoxes[0], procAssign, baseDomain);
 
-     a_amrGrids[0] = baseGrids;
+     a_grids[0] = baseGrids;
    }
 
 
@@ -668,7 +597,7 @@ void setupGrids(Vector<DisjointBoxLayout>& a_amrGrids,                          
          {
            for (int ilev = 1; ilev <= maxLevel; ilev++)
              {
-               const ProblemDomain& levDomain = a_amrDomains[ilev];
+               const ProblemDomain& levDomain = a_domain[ilev];
 
                Vector<Box>   boxes;
                char boxCountVar[100];
@@ -708,7 +637,7 @@ void setupGrids(Vector<DisjointBoxLayout>& a_amrGrids,                          
                  }
                Vector<int>  proc(boxes.size());
                LoadBalance(proc,boxes);
-               a_amrGrids[ilev] = DisjointBoxLayout(boxes, proc, levDomain);
+               a_grids[ilev] = DisjointBoxLayout(boxes, proc, levDomain);
                a_finestLevel++;
              }
 
@@ -717,8 +646,8 @@ void setupGrids(Vector<DisjointBoxLayout>& a_amrGrids,                          
          {
            // tag on grad(rhs)
            int bufferSize = 1;
-           BRMeshRefine meshGen(a_amrDomains[0],
-                                a_refRatios,
+           BRMeshRefine meshGen(a_domain[0],
+                                a_ref_ratio,
                                 fillRatio,
                                 blockFactor,
                                 bufferSize,
@@ -729,7 +658,7 @@ void setupGrids(Vector<DisjointBoxLayout>& a_amrGrids,                          
            oldMeshes[0] = vectBoxes[0];
            for (int lev=1; lev<oldMeshes.size(); lev++)
              {
-               oldMeshes[lev].push_back(a_amrDomains[lev].domainBox());
+               oldMeshes[lev].push_back(a_domain[lev].domainBox());
              }
 
            Real refineThresh;
@@ -746,18 +675,18 @@ void setupGrids(Vector<DisjointBoxLayout>& a_amrGrids,                          
                for (int lev=0; lev<= a_finestLevel; lev++)
                  {
                    // note that we add a ghost cell to simplify gradients
-                   tempRHS[lev] = new LevelData<FArrayBox>(a_amrGrids[lev],
+                   tempRHS[lev] = new LevelData<FArrayBox>(a_grids[lev],
                                                            1, IntVect::Unit);
                  }
 
-               setRHS(tempRHS, a_amrDomains, a_refRatios, a_amrDx,
+               setRHS(tempRHS, a_domain, a_ref_ratio, a_dx,
                       a_finestLevel);
 
                Vector<IntVectSet> tags(a_finestLevel+1);
 
                for (int lev=0; lev<a_finestLevel+1; lev++)
                  {
-                   const DisjointBoxLayout& levelGrids = a_amrGrids[lev];
+                   const DisjointBoxLayout& levelGrids = a_grids[lev];
                    const LevelData<FArrayBox>& levelRHS = *tempRHS[lev];
                    IntVectSet& levelTags = tags[lev];
 
@@ -827,8 +756,8 @@ void setupGrids(Vector<DisjointBoxLayout>& a_amrGrids,                          
                        LoadBalance(procAssign, vectBoxes[lev]);
                        DisjointBoxLayout levelGrids(vectBoxes[lev],
                                                     procAssign,
-                                                    a_amrDomains[lev]);
-                       a_amrGrids[lev] = levelGrids;
+                                                    a_domain[lev]);
+                       a_grids[lev] = levelGrids;
                      }
                    if (s_verbosity>2) pout() << "setupGrids: "<< a_finestLevel <<") size " << a_amrGrids[a_finestLevel].size() << endl;
                  }
@@ -893,8 +822,8 @@ void setupGrids(Vector<DisjointBoxLayout>& a_amrGrids,                          
 
    opFactory.define(a_domain[0],                                                 // Define the parameters that go into each instance of opFactory
                     a_grids,
-                    a_ref ratio,
-                    a_amrDx[0],
+                    a_ref_ratio,
+                    a_dx[0],
                     &ParseBC, alpha, beta);
 
    AMRLevelOpFactory<LevelData<FArrayBox> >& castFact = (AMRLevelOpFactory<LevelData<FArrayBox> >& ) opFactory;  // ??? dummy?
