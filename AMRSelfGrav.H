@@ -66,11 +66,11 @@ using std::ios;
 static void enableFpExceptions();
 #endif
 
-virtual void initiate(LevelData<FArrayBox>& a_gravpot);
+//virtual void initiate(LevelData<FArrayBox>& a_gravpot);
 
-virtual void starter(LevelData<FArrayBox>& a_gravpot);
+//virtual void starter(LevelData<FArrayBox>& a_gravpot);
 
-virtual void solveSelfGravPot(Vector<LevelData<FArrayBox>*>&       a_gravpot,
+/*virtual void solveSelfGravPot(Vector<LevelData<FArrayBox>*>&       a_gravpot,
                               Vector<LevelData<FArrayBox>*>        a_U,
                               const Vector<DisjointBoxLayout>&     a_grids,
                               const Vector<int>&                   m_ref_ratio,
@@ -87,6 +87,54 @@ void solveElliptic(Vector<LevelData<FArrayBox>* >& phi,         // Output self-g
                    const ProblemDomain& level0Domain,           //
                    Real alpha, Real beta, Real coarsestDx)      // constants alpha=0, beta=1/(4*pi*G)
 */
+
+virtual void ParseValue(Real* pos,                                                       // Looks like this would normally parse a BC value settings from a file
+                        int* dir,                                                        // dir = direction? as in dimension 1,2,3?
+                        Side::LoHiSide* side,                                            // Which side of the coordinate boundary?
+                        Real* a_values);
+
+virtual void ParseBC(FArrayBox& a_state,                                                 // See documentation for BCfunction. State is the value of Phi within box
+                     const Box& a_valid,                                                 // domain of the box (might be a subdomain?) around which the BCs are 'built'
+                     const ProblemDomain& a_domain,                                      // This is the coarsest domain
+                     Real a_dx,                                                          // without grid data is this just the coarse dx
+                     bool a_homogeneous);
+
+virtual static void DampDiriBC( FArrayBox&      a_state,                                 // State is the value of \phi with in the box a_valid
+                                const Box&      a_valid,                                 // Box around which BCs are constructed
+                                const ProblemDomain& a_domain,                           // Coarsest grid domain
+                                int             a_ratio,                                 // grid refinement ratio
+                                int             a_dir,                                   // ???
+                                Side::LoHiSide  a_side,                                  // Which side of the domain?
+                                Interval&       a_interval                               // ???
+                              );
+
+virtual void DampBC( FArrayBox& a_state,                                                 // See above for arguments
+                     const Box& a_valid,
+                     const ProblemDomain& a_domain,
+                     Real a_dx,
+                     int a_ratio );
+
+virtual extern void convDiriBC_RBGS( FArrayBox&      a_state,
+                                     const FArrayBox& a_rhs,
+                                     const Box&      a_valid,
+                                     const ProblemDomain& a_domain,
+                                     Real a_dx,
+                                     int             a_whichpass,                        // ??? Which part of the v-cycle one is in?
+                                     int             a_dir,
+                                     Side::LoHiSide  a_side);
+
+virtual void convergeGS_BC( FArrayBox& a_state,
+                            const FArrayBox& a_rhs,
+                            const Box& a_valid,
+                            const ProblemDomain& a_domain,
+                            Real a_dx,
+                            int a_whichpass );
+
+virtual void setupGrids(Vector<DisjointBoxLayout>& a_grids,                           // uncertain whether I will need to setup my own grid, but
+                        Vector<ProblemDomain>& a_domains,                                 // this will be good for completeness sake
+                        Vector<int>& a_ref_ratio,
+                        Vector<Real>& a_dx,
+                        int& a_finestLevel); 
 
 virtual int runSolver();
 
