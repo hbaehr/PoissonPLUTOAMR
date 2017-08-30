@@ -114,11 +114,11 @@ bool              GlobalBCRS::s_trigParsed= false;
 void ParseValue(Real* pos,                                                       // Looks like this would normally parse a BC value settings from a file
                 int* dir,                                                        // dir = direction? as in dimension 1,2,3?
                 Side::LoHiSide* side,                                            // Which side of the coordinate boundary?
-                Real* a_values)                                                  // ???
+                Real* a_values)                                                  // ??? boundary values
 {
   //  ParmParse pp;
   //Real bcVal;
-  //pp.get("bc_value",bcVal);
+  //pp.get("bc_value",bcVal);                                                    // I still need to get the bc value from somewhere
   a_values[0]=0.;
 }
 
@@ -446,46 +446,41 @@ void convergeGS_BC( FArrayBox& a_state,
 *
 */
 
-void setRHS(Vector<LevelData<FArrayBox>* > a_rhs,                                // Output array of \rho: a_U[RHO]?
+void setRHS(Vector<LevelData<FArrayBox>* > a_U[RHO],                                // Output array of \rho: a_U[RHO]?
             Vector<ProblemDomain>& a_domain,                                     // Grid domain
             Vector<int>& m_ref_ratio,                                            // Refinement ratios between levels
-            Vector<Real>& a_dx,                                                  // *** dx: not sure what this value is atm
+            Vector<Real>& a_dx,                                                  // dx: grid spacing
             int a_finestLevel)                                                   // *** number of most refined level = len(m_level)
 {
   CH_TIME("setRHS");
 
   for (int lev=0; lev<=a_finestLevel; lev++)                                     // Looping over all levels
     {
-      LevelData<FArrayBox>& levelRhs = *(a_rhs[lev]);                            // Each a_rhs[lev] is an FArrayBox temporarily stored as levelRhs
+      LevelData<FArrayBox>& levelRhs = *(a_U[RHO][lev]);                            // Each a_rhs[lev] is an FArrayBox temporarily stored as levelRhs
       const DisjointBoxLayout& levelGrids = levelRhs.getBoxes();                 // Get box indeces for each level
 
       // rhs is cell-centered...
-      RealVect ccOffset = 0.5*a_amrDx[lev]*RealVect::Unit;                       // Adjust for the cell-centered location of the data ???
+      RealVect ccOffset = 0.5*a_dx[lev]*RealVect::Unit;                          // Adjust for the cell-centered location of the data
 
       DataIterator levelDit = levelGrids.dataIterator();                         // Write data to a level
       for (levelDit.begin(); levelDit.ok(); ++levelDit)                          // Iterate over all points on the level?
         {
-          FArrayBox& thisRhs = levelRhs[levelDit];                               // Dummy thisRhs for the iteration of this loop
+          FArrayBox& thisRhs = levelRhs[levelDit];                               // Dummy thisRhs for the iteration of this level
 
-              thisRhs.setVal(0.0);                                               // Everything up to here is clear - setting up the Gaussian distributions
-                                                                                 // but is this where one needs to start 'placing' the numbers
-              BoxIterator bit(thisRhs.box());                                    // on the grid? YES See the sine wave IC for an easier example
+              thisRhs.setVal(0.0);                                               // Start by setting everything to 0
+
+              BoxIterator bit(thisRhs.box());                                    // Loop over the entire box on this level
               for (bit.begin(); bit.ok(); ++bit)
                 {
-                  IntVect iv = bit();
-                  RealVect loc(iv);
-                  loc *= a_amrDx[lev];
+                  IntVect iv = bit();                                            // IntVect = vector of integers?, numbers corresponding to grids cells in one direction
+                  RealVect loc(iv);                                              // RealVect = vector of real values?, coordinate location of each cell?
+                  loc *= a_dx[lev];
                   loc += ccOffset;
 
-                  for (int n=0; n<numGaussians; n++)
-                    {
-                      RealVect dist = loc - center[n];
-                      Real radSqr = D_TERM(dist[0]*dist[0],
-                                           +dist[1]*dist[1],
-                                            +dist[2]*dist[2]);
+                  RealVect dist = loc - center[n];;
 
-                       Real val = strength[n]*exp(-radSqr/scale[n]);
-                       thisRhs(iv,0) += val;
+                  Real val = ;
+                  thisRhs(iv,0) += val;
                      }
                  }
              }
@@ -494,8 +489,8 @@ void setRHS(Vector<LevelData<FArrayBox>* > a_rhs,                               
  }
 
 
-void setupGrids(Vector<DisjointBoxLayout>& a_grids,                           // uncertain whether I will need to setup my own grid, but
-            Vector<ProblemDomain>& a_domains,                                 // this will be good for completeness sake
+void setupGrids(Vector<DisjointBoxLayout>& a_grids,                              // uncertain whether I will need to setup my own grid, but
+            Vector<ProblemDomain>& a_domains,                                    // this will be good for completeness sake
             Vector<int>& a_ref_ratio,
             Vector<Real>& a_dx,
             int& a_finestLevel)
