@@ -498,23 +498,13 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
    CH_TIME("setupGrids");
 
    a_finestLevel = 0;
-   ParmParse ppGrids("grids");
 
    // get grid generation parameters
    int maxLevel, maxBoxSize, blockFactor;                                        // parameters to be read from file
    Real fillRatio;
 
-   ppGrids.get("max_level", maxLevel);
-
-   ppGrids.get("max_box_size",maxBoxSize);
-
-   ppGrids.get("block_factor", blockFactor);
-
-   ppGrids.get("fillRatio", fillRatio);
-
    // note that there only need to be numLevels-1 refinement ratios
-   a_refRatios.resize(maxLevel);
-   ppGrids.getarr("ref_ratio", a_refRatios, 0, maxLevel);                        // read the refinement ratios as an array
+   a_ref_ratios.resize(maxLevel);
 
    Vector<int>  is_periodic_int;                                                 // periodicity of the boundaries in each direction
    bool is_periodic[SpaceDim];
@@ -561,7 +551,7 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
    for (int lev=1; lev<= maxLevel; lev++)
      {
        a_domain[lev] = a_domain[lev-1];
-       a_domain[lev].refine(a_refRatios[lev-1]);
+       a_domain[lev].refine(a_ref_ratios[lev-1]);
        a_dx[lev] = a_dx[lev-1]/a_ref ratio[lev-1];
      }
 
@@ -754,7 +744,7 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
                                                     a_domain[lev]);
                        a_grids[lev] = levelGrids;
                      }
-                   if (s_verbosity>2) pout() << "setupGrids: "<< a_finestLevel <<") size " << a_amrGrids[a_finestLevel].size() << endl;
+                   if (s_verbosity>2) pout() << "setupGrids: "<< a_finestLevel <<") size " << a_grids[a_finestLevel].size() << endl;
                  }
                else
                  {
@@ -779,7 +769,7 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
        // fill in remaining levels with empty DisjointBoxLayouts
        for (int lev= a_finestLevel+1; lev<=maxLevel; lev++)
          {
-           a_amrGrids[lev] = DisjointBoxLayout();
+           a_grids[lev] = DisjointBoxLayout();
          }
 
      }
