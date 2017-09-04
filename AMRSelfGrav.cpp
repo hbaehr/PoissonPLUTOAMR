@@ -60,14 +60,6 @@ using std::ios;
 static void enableFpExceptions();
 #endif
 
-/* For time being, unnecessary
-  // initialize some temporary storage for the gravitational potential
-  {
-  //  CH_TIME("setup::Udefine"); // This is used to time processes for debugging purposes
-    m_gravpot.define(m_grids,m_numCons,m_numGhost*IntVect::Unit);
-  }
-  */
-
 // Other things which need to be addressed:
 // 1) Boundary conditions
 // 2) Initial conditions
@@ -456,11 +448,11 @@ void setRHS(Vector<LevelData<FArrayBox>* > a_U,                                 
 
   for (int lev=0; lev<=a_finestLevel; lev++)                                     // Looping over all levels
     {
-      LevelData<FArrayBox>& levelRhs = *(a_U());                            // Each a_rhs[lev] is an FArrayBox temporarily stored as levelRhs
+      LevelData<FArrayBox>& levelRhs = *(a_U(lev));                              // Each a_rhs[lev] is an FArrayBox temporarily stored as levelRhs
       const DisjointBoxLayout& levelGrids = levelRhs.getBoxes();                 // Get box indeces for each level
 
       // rhs is cell-centered...
-      RealVect ccOffset = 0.5*a_dx[lev]*RealVect::Unit;                          // Adjust for the cell-centered location of the data
+      RealVect ccOffset = 0.5*a_dx[lev]*RealVect::Unit;                          // Adjust for the cell-centered location of the data // lev in PLUTO =?
 
       DataIterator levelDit = levelGrids.dataIterator();                         // Write data to a level
       for (levelDit.begin(); levelDit.ok(); ++levelDit)                          // Iterate over all points on the level?
@@ -479,7 +471,7 @@ void setRHS(Vector<LevelData<FArrayBox>* > a_U,                                 
 
                   RealVect dist = loc - center[n];                               //defining the distance of a location from the center?
 
-                  Real val = ;
+                  Real val = 0.0;
                   thisRhs(iv,0) += a_U(iv,RHO);
                      }
                  }
@@ -491,10 +483,10 @@ void setRHS(Vector<LevelData<FArrayBox>* > a_U,                                 
 
 void setupGrids(Vector<DisjointBoxLayout>& a_grids,                              // uncertain whether I will need to setup my own grid, but
             Vector<ProblemDomain>& a_domains,                                    // this will be good for completeness sake
-            Vector<int>& a_ref_ratio,
-            Vector<Real>& a_dx,
-            int& a_finestLevel)
-{
+            Vector<int>& a_ref_ratio,                                            // grid parameters are already defined in other areas of
+            Vector<Real>& a_dx,                                                  // PLUTO Chombo and if this setup is just to define the bounds
+            int& a_finestLevel)                                                  // of the box then I already have that. I guess I just need to know
+{                                                                                // if I should 'generate' a new grid or 'reuse' the old structure?
    CH_TIME("setupGrids");
 
    a_finestLevel = 0;
@@ -900,7 +892,7 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
      }
 
    setRHS(rhs, domain, ref_ratio, dx, finestLevel );                             // set the RHS, wasn't this done in the beginning already?
-
+                                                                                 // or was that just the rules and parameters and this is the execution?
    // do solve
    int iterations = 1;
    ppMain.get("iterations", iterations);                                         // ppMain = ???
