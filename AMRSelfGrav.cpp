@@ -446,7 +446,7 @@ void convergeGS_BC( FArrayBox& a_state,
 *
 */
 
-void setRHS(Vector<LevelData<FArrayBox>* > a_U[RHO],                                // Output array of \rho: a_U[RHO]?
+void setRHS(Vector<LevelData<FArrayBox>* > a_U,                                  // Output array of \rho: a_U[RHO]?
             Vector<ProblemDomain>& a_domain,                                     // Grid domain
             Vector<int>& m_ref_ratio,                                            // Refinement ratios between levels
             Vector<Real>& a_dx,                                                  // dx: grid spacing
@@ -456,7 +456,7 @@ void setRHS(Vector<LevelData<FArrayBox>* > a_U[RHO],                            
 
   for (int lev=0; lev<=a_finestLevel; lev++)                                     // Looping over all levels
     {
-      LevelData<FArrayBox>& levelRhs = *(a_U[RHO][lev]);                            // Each a_rhs[lev] is an FArrayBox temporarily stored as levelRhs
+      LevelData<FArrayBox>& levelRhs = *(a_U());                            // Each a_rhs[lev] is an FArrayBox temporarily stored as levelRhs
       const DisjointBoxLayout& levelGrids = levelRhs.getBoxes();                 // Get box indeces for each level
 
       // rhs is cell-centered...
@@ -469,7 +469,7 @@ void setRHS(Vector<LevelData<FArrayBox>* > a_U[RHO],                            
 
               thisRhs.setVal(0.0);                                               // Start by setting everything to 0
 
-              BoxIterator bit(thisRhs.box());                                    // Loop over the entire box on this level
+              BoxIterator bit(thisRhs.box());                                    // Loop over the IntVects of a Box
               for (bit.begin(); bit.ok(); ++bit)
                 {
                   IntVect iv = bit();                                            // IntVect = vector of integers?, numbers corresponding to grids cells in one direction
@@ -477,10 +477,10 @@ void setRHS(Vector<LevelData<FArrayBox>* > a_U[RHO],                            
                   loc *= a_dx[lev];
                   loc += ccOffset;
 
-                  RealVect dist = loc - center[n];;
+                  RealVect dist = loc - center[n];                               //defining the distance of a location from the center?
 
                   Real val = ;
-                  thisRhs(iv,0) += val;
+                  thisRhs(iv,0) += a_U(iv,RHO);
                      }
                  }
              }
