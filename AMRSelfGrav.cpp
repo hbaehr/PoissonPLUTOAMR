@@ -493,10 +493,10 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
 
    // get grid generation parameters
    int maxLevel, maxBoxSize, blockFactor;                                        // parameters to be read from file
-   Real fillRatio;
+   Real fillRatio;                                                               // These parameters should be already provided somewhere
 
    // note that there only need to be numLevels-1 refinement ratios
-   a_ref_ratios.resize(maxLevel);
+   a_ref_ratios.resize(maxLevel);                                                // This confuses me, ut seems like there are ususally numLevels+1 ratios
 
    Vector<int>  is_periodic_int;                                                 // periodicity of the boundaries in each direction
    bool is_periodic[SpaceDim];
@@ -506,13 +506,13 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
        is_periodic[dir] = (is_periodic_int[dir] == 1);
      }
 
-   IntVect numCells;
-   Vector<int> incells(SpaceDim);
+   IntVect numCells;                                                             // All about numCells, first with initialization and then some
+   Vector<int> incells(SpaceDim);                                                // parameters, but I am confused by the last line. D_DECL6???
    ppGrids.getarr("num_cells", incells, 0, SpaceDim);
    numCells = IntVect(D_DECL6(incells[0],incells[1],incells[2],
                               incells[3],incells[4],incells[5]) );
 
-   RealVect domainSize = RealVect::Unit;
+   RealVect domainSize = RealVect::Unit;                                         // Sets the physical domain of the grid
    if (ppGrids.contains("domain_size"))
      {
        Vector<Real> insize(SpaceDim);
@@ -521,41 +521,41 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
                                insize[3],insize[4],insize[5]) );
      }
 
-   // resize dataholders
+   // resize dataholders                                                         // Why do they need to be resized? For refinement?
    int maxNumLevels = maxLevel +1;
    a_grids.resize(maxNumLevels);
    a_domain.resize(maxNumLevels);
    a_dx.resize(maxNumLevels,-1);
    a_finestLevel = 0;
 
-   // assumes dx=dy=dz
-   a_dx[0] = domainSize[0]/numCells[0];
-   a_dx[1] = domainSize[1]/numCells[1];
-   a_dx[2] = domainSize[2]/numCells[2];
+   // assumes dx=dy=dz                                                           // This assumption will not hold in PLUTO, but I should check
+   a_dx[0] = domainSize[0]/numCells[0];                                          // where they are defined in the main code
+   a_dx[1] = domainSize[1]/numCells[1];                                          // Wait is this the dx in each direction or on each level?
+   a_dx[2] = domainSize[2]/numCells[2];                                          // If the later, why stop at 3 levels?
 
-   IntVect domLo = IntVect::Zero;
-   IntVect domHi  = numCells - IntVect::Unit;
+   IntVect domLo = IntVect::Zero;                                                // Defining the IntVect at the low end (first in the cycle)
+   IntVect domHi  = numCells - IntVect::Unit;                                    // Defining the last IntVect
 
    ProblemDomain baseDomain(domLo, domHi, is_periodic);
    a_domain[0] = baseDomain;
 
    // set up refined domains, etc
-   for (int lev=1; lev<= maxLevel; lev++)
-     {
-       a_domain[lev] = a_domain[lev-1];
-       a_domain[lev].refine(a_ref_ratios[lev-1]);
+   for (int lev=1; lev<= maxLevel; lev++)                                        // Cycling through the levels
+     {                                                                           // lev=1 is first refined level
+       a_domain[lev] = a_domain[lev-1];                                          // lev=2 is second refined level
+       a_domain[lev].refine(a_ref_ratios[lev-1]);                                // etc.
        a_dx[lev] = a_dx[lev-1]/a_ref ratio[lev-1];
      }
 
-   Vector<Vector<Box> > vectBoxes(maxLevel+1);
+   Vector<Vector<Box> > vectBoxes(maxLevel+1);                                   // No idea what vectorBoxes are, look this up !!!
 
    // local scope. for base-level grid generation
    {
      CH_TIME("BaseGridCreation");
      // generate base level grids
 
-     domainSplit(baseDomain, vectBoxes[0], maxBoxSize, blockFactor);
-
+     domainSplit(baseDomain, vectBoxes[0], maxBoxSize, blockFactor);             // No idea what these are, but there seems to be some processor
+                                                                                 // allotment going on
      Vector<int> procAssign(vectBoxes[0].size(), 0);
 
      LoadBalance(procAssign, vectBoxes[0]);
@@ -572,26 +572,26 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
        ppGrids.query("read_in_grids", read_grids);
        if (read_grids)
          {
-           for (int ilev = 1; ilev <= maxLevel; ilev++)
+           for (int ilev = 1; ilev <= maxLevel; ilev++)                          // Loop over refinement levels = ilev?
              {
                const ProblemDomain& levDomain = a_domain[ilev];
 
                Vector<Box>   boxes;
-               char boxCountVar[100];
-               int boxCount;
-               sprintf(boxCountVar, "level_%d_box_count", ilev);
-               ppGrids.get(boxCountVar, boxCount);
-               boxes.resize(boxCount);
-               for (int ibox = 0; ibox < boxCount; ibox++)
+               char boxCountVar[100];                                            // ???
+               int boxCount;                                                     // Number of boxes within each level?
+               sprintf(boxCountVar, "level_%d_box_count", ilev);                 // Look for this print in the output
+               ppGrids.get(boxCountVar, boxCount);                               // Gets the limiting count from the parameter file
+               boxes.resize(boxCount);                                           //
+               for (int ibox = 0; ibox < boxCount; ibox++)                       // For each level loop through boxes until the max is reached
                  {
-                   char boxLoVar[100];
+                   char boxLoVar[100];                                           // Why [100]?
                    char boxHiVar[100];
-                   sprintf(boxLoVar, "level_%d_box_%d_lo", ilev, ibox);
-                   sprintf(boxHiVar, "level_%d_box_%d_hi", ilev, ibox);
+                   sprintf(boxLoVar, "level_%d_box_%d_lo", ilev, ibox);          // Check the output for these statements
+                   sprintf(boxHiVar, "level_%d_box_%d_hi", ilev, ibox);          //
                    Vector<int> boxLo, boxHi;
-                   ppGrids.getarr(boxLoVar, boxLo, 0, SpaceDim);
+                   ppGrids.getarr(boxLoVar, boxLo, 0, SpaceDim);                 // Also look in the parameter file
                    ppGrids.getarr(boxHiVar, boxHi, 0, SpaceDim);
-                   IntVect ivLo(D_DECL(boxLo[0], boxLo[1], boxLo[2]));
+                   IntVect ivLo(D_DECL(boxLo[0], boxLo[1], boxLo[2]));           // Here is that D_DECL again
                    IntVect ivHi(D_DECL(boxHi[0], boxHi[1], boxHi[2]));
                    boxes[ibox] = Box(ivLo, ivHi);
                    if (!levDomain.contains(boxes[ibox]))
