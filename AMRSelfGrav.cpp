@@ -592,7 +592,7 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
                    ppGrids.getarr(boxLoVar, boxLo, 0, SpaceDim);                 // Also look in the parameter file
                    ppGrids.getarr(boxHiVar, boxHi, 0, SpaceDim);
                    IntVect ivLo(D_DECL(boxLo[0], boxLo[1], boxLo[2]));           // Here is that D_DECL again
-                   IntVect ivHi(D_DECL(boxHi[0], boxHi[1], boxHi[2]));
+                   IntVect ivHi(D_DECL(boxHi[0], boxHi[1], boxHi[2]));           // Is this creating the lo and hi through which the BoxIterator cycles?
                    boxes[ibox] = Box(ivLo, ivHi);
                    if (!levDomain.contains(boxes[ibox]))
                      {
@@ -614,8 +614,8 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
                  }
                Vector<int>  proc(boxes.size());
                LoadBalance(proc,boxes);
-               a_grids[ilev] = DisjointBoxLayout(boxes, proc, levDomain);
-               a_finestLevel++;
+               a_grids[ilev] = DisjointBoxLayout(boxes, proc, levDomain);        // What is going on here ...
+               a_finestLevel++;                                                  // and here?
              }
 
          }
@@ -623,15 +623,15 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
          {
            // tag on grad(rhs)
            int bufferSize = 1;
-           BRMeshRefine meshGen(a_domain[0],
-                                a_ref_ratio,
+           BRMeshRefine meshGen(a_domain[0],                                     // So refinement is managed by some other class
+                                a_ref_ratio,                                     // check TagCells.cpp to see how it is done in PLUTO. Same?
                                 fillRatio,
                                 blockFactor,
                                 bufferSize,
                                 maxBoxSize);
 
            // to be used by MeshRefine...
-           Vector<Vector<Box> > oldMeshes(maxLevel+1);
+           Vector<Vector<Box> > oldMeshes(maxLevel+1);                           // How do these vector boxes relate to the a_grid structures?
            oldMeshes[0] = vectBoxes[0];
            for (int lev=1; lev<oldMeshes.size(); lev++)
              {
@@ -646,12 +646,12 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
            bool moreLevels = true;
            while (moreLevels)
              {
-               // tag based on grad(rhs)
+               // tag based on grad(rhs)                                         // I am curious to see how the grad is handled, maybe I can make use of it?
                // first need to allocate RHS
                Vector<LevelData<FArrayBox>* > tempRHS(a_finestLevel+1, NULL);
                for (int lev=0; lev<= a_finestLevel; lev++)
-                 {
-                   // note that we add a ghost cell to simplify gradients
+                 {                                                               // Looping over the levels and creating a temporary RHS from the grid layout
+                   // note that we add a ghost cell to simplify gradients        // Note: a SINGLE ghost cell -- Is that what is meant by the '1'?
                    tempRHS[lev] = new LevelData<FArrayBox>(a_grids[lev],
                                                            1, IntVect::Unit);
                  }
