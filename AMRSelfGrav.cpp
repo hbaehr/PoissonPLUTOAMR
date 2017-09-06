@@ -656,24 +656,24 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
                                                            1, IntVect::Unit);
                  }
 
-               setRHS(tempRHS, a_domain, a_ref_ratio, a_dx,
+               setRHS(tempRHS, a_domain, a_ref_ratio, a_dx,                      // This is the function that sets up the RHS, only this time on tempRHS !!!!
                       a_finestLevel);
 
                Vector<IntVectSet> tags(a_finestLevel+1);
 
-               for (int lev=0; lev<a_finestLevel+1; lev++)
+               for (int lev=0; lev<a_finestLevel+1; lev++)                       // Looping over the AMR levels
                  {
                    const DisjointBoxLayout& levelGrids = a_grids[lev];
                    const LevelData<FArrayBox>& levelRHS = *tempRHS[lev];
                    IntVectSet& levelTags = tags[lev];
 
                    // compute mag(gradient)
-                   DataIterator dit = levelGrids.dataIterator();
-                   for (dit.begin(); dit.ok(); ++dit)
+                   DataIterator dit = levelGrids.dataIterator();                 // DING DING This is the iterator over grids on the level
+                   for (dit.begin(); dit.ok(); ++dit)                            // So it considers that there are multiple grids per level
                      {
                        const FArrayBox& rhsFab = levelRHS[dit];
                        // local storage foer gradient
-                       FArrayBox gradFab(levelGrids[dit],1);
+                       FArrayBox gradFab(levelGrids[dit],1);                     // So this is temporary storage?
                        gradFab.setVal(0.0);
                        Real thisGrad;
 
@@ -683,9 +683,9 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
                            IntVect iv=bit();
                            for (int dir=0; dir<SpaceDim; dir++)
                              {
-                               // use mag(undivided gradient)
-                               IntVect hi = iv + BASISV(dir);
-                               IntVect lo = iv - BASISV(dir);
+                               // use mag(undivided gradient)                    // Here is where the gradient is actually calculated
+                               IntVect hi = iv + BASISV(dir);                    // Looks pretty straight forward, maybe it can be used for the potential as well
+                               IntVect lo = iv - BASISV(dir);                    // It does not necessarily have to return the result to the main array, right?
                                thisGrad = rhsFab(hi,0) - rhsFab(lo,0);
                                gradFab(iv,0) += (thisGrad*thisGrad);
                              } // end loop over directions
@@ -699,7 +699,7 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
                            IntVect iv = bit();
                            if (gradFab(iv,0) > threshSqr)
                              {
-                               levelTags |= iv;
+                               levelTags |= iv;                                  // | is the bitwise inclusive or operator
                              }
                          } // end loop over cells
                      } // end loop over grids on this level
@@ -714,8 +714,8 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
                  }
 
                int topLevel = a_finestLevel;
-               int newFinestLevel =  meshGen.regrid(vectBoxes,
-                                                    tags,
+               int newFinestLevel =  meshGen.regrid(vectBoxes,                   // And mesh refinement is handled by an external call
+                                                    tags,                        // Check how PLUTO does this
                                                     0,
                                                     topLevel,
                                                     oldMeshes);
@@ -729,7 +729,7 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
                    // setup new grid hierarchy
                    for (int lev=1; lev<=a_finestLevel; lev++)
                      {
-                       Vector<int> procAssign(vectBoxes[lev].size(),0);
+                       Vector<int> procAssign(vectBoxes[lev].size(),0);          // More stuff I do not understand. Look into this procAssign stuff
                        LoadBalance(procAssign, vectBoxes[lev]);
                        DisjointBoxLayout levelGrids(vectBoxes[lev],
                                                     procAssign,
@@ -751,7 +751,7 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
                // clean up before starting again
                for (int lev=0; lev<tempRHS.size(); lev++)
                  {
-                   delete tempRHS[lev];
+                   delete tempRHS[lev];                                          // Empty out temporary strage
                  }
 
              } // end while (moreLevels)
@@ -759,9 +759,9 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
          }
 
        // fill in remaining levels with empty DisjointBoxLayouts
-       for (int lev= a_finestLevel+1; lev<=maxLevel; lev++)
-         {
-           a_grids[lev] = DisjointBoxLayout();
+       for (int lev= a_finestLevel+1; lev<=maxLevel; lev++)                      // So would this be the point where non-refined upper levels are filled with nulls?
+         {                                                                       // No, say 5 refinement levels are possible, but only up to lev=3 is used,
+           a_grids[lev] = DisjointBoxLayout();                                   // then lev = 4,5 are filled with empty boxes so they do not cause problems
          }
 
      }
