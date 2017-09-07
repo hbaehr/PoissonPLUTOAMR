@@ -459,20 +459,20 @@ void setRHS(Vector<LevelData<FArrayBox>* > a_U,                                 
         {
           FArrayBox& thisRhs = levelRhs[levelDit];                               // Dummy thisRhs for the iteration of this level
 
-          thisRhs.setVal(0.0);                                               // Start by setting everything to 0
+          thisRhs.setVal(0.0);                                                   // Start by setting everything to 0
 
-          BoxIterator bit(thisRhs.box());                                    // Loop over the IntVects of a Box
+          BoxIterator bit(thisRhs.box());                                        // Loop over the IntVects of a Box
           for (bit.begin(); bit.ok(); ++bit)
             {
-              IntVect iv = bit();                                            // IntVect = vector of integers?, numbers corresponding to grids cells in one direction
-              RealVect loc(iv);                                              // RealVect = vector of real values?, coordinate location of each cell?
+              IntVect iv = bit();                                                // IntVect = vector of integers?, numbers corresponding to grids cells in one direction
+              RealVect loc(iv);                                                  // RealVect = vector of real values?, coordinate location of each cell?
               loc *= a_dx[lev];
               loc += ccOffset;
 
-              RealVect dist = loc - center[n];                               //defining the distance of a location from the center?
+              RealVect dist = loc - center[n];                                   //defining the distance of a location from the center?
 
               Real val = 0.0;
-              thisRhs(iv,0) += a_U(iv,RHO);                                  // This looks right, but I am confused by all the different U containers
+              thisRhs(iv,0) += a_U(iv,RHO);                                      // This looks right, but I am confused by all the different U containers
             }
          } // end loop over grids on this level
      } // end loop over levels
@@ -490,8 +490,8 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
    a_finestLevel = 0;
 
    // get grid generation parameters
-//   int maxLevel, maxBoxSize, blockFactor;                                        // parameters to be read from file
-//   Real fillRatio;                                                               // These parameters should be already provided somewhere; for now define them
+//   int maxLevel, maxBoxSize, blockFactor;                                      // parameters to be read from file
+//   Real fillRatio;                                                             // These parameters should be already provided somewhere; for now define them
    int maxLevel = 2;
    int maxBoxSize = 10000;
    int blockFactor =8;
@@ -789,14 +789,14 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
  {
    CH_TIME("setupSolver");                                                       // Timing diagnostic
 
-//   ParmParse ppSolver("solver");                                                 // ??? WHere does ppSolver come from? Parse parameter information from input files
+//   ParmParse ppSolver("solver");                                               // ??? WHere does ppSolver come from? Parse parameter information from input files
 
    int numLevels = a_finestLevel+1;                                              // 0 index count of total levels
 
    AMRPoissonOpFactory opFactory;                                                // Create an instance of AMRPoissonOpFactory
 
    // solving poisson problem here
-   Real alpha =0.0;                                                              // Constants which determine form of the Poisson equation
+   Real alpha = 0.0;                                                             // Constants which determine form of the Poisson equation
    Real beta = 1.0/(4*3.14159265);                                               // \beta will be 1/(4*\pi*G) in cgs or code units? For now, G=1
 
    opFactory.define(a_domain[0],                                                 // Define the parameters that go into each instance of opFactory
@@ -811,16 +811,16 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
                       &a_bottomSolver, numLevels);
 
    // multigrid solver parameters                                                // Parameters for solving over multiple levels ???
-//   int numSmooth, numMG, maxIter;                                                // So ParmParse look into the 'inputs' file and for in the instance
-//   Real eps, hang;                                                               // ppSolver, extracts all values on lines which start with 'solver.'
+//   int numSmooth, numMG, maxIter;                                              // So ParmParse look into the 'inputs' file and for in the instance
+//   Real eps, hang;                                                             // ppSolver, extracts all values on lines which start with 'solver.'
    int numSmooth = 4;
    int numMG = 1;
    int maxIter = 100;
    Real eps = 1.0e-9;
    Real hang = 1.0e-10;
-//   ppSolver.get("num_smooth", numSmooth);                                        // and returns the values for the respective variable names
+//   ppSolver.get("num_smooth", numSmooth);                                      // and returns the values for the respective variable names
 //   ppSolver.get("num_mg",     numMG);
-//   ppSolver.get("max_iterations", maxIter);                                      // Since I will not be reading any of this from file I will have to define it
+//   ppSolver.get("max_iterations", maxIter);                                    // Since I will not be reading any of this from file I will have to define it
 //   ppSolver.get("tolerance", eps);
 //   ppSolver.get("hang",      hang);
 
@@ -903,7 +903,7 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
                                                                                  // or was that just the rules and parameters and this is the execution?
    // do solve
    int iterations = 1;
-//   ppMain.get("iterations", iterations);                                         // ppMain = ???
+//   ppMain.get("iterations", iterations);                                       // ppMain = ???
 
    for (int iiter = 0; iiter < iterations; iiter++)                              // interate over
      {
