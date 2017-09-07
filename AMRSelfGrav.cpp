@@ -133,7 +133,7 @@ void ParseBC(FArrayBox& a_state,                                                
       //   }
 
       Box valid = a_valid;                                                       // subdomain(?) around which the BCs are constructed
-      for (int i=0; i<CH_SPACEDIM; ++i)                                          // CH_SPACEDIM = 3?
+      for (int i=0; i<CH_SPACEDIM; ++i)                                          // CH_SPACEDIM = 2 or 3?
         {
           // don't do anything if periodic
           if (!a_domain.isPeriodic(i))                                           // So when not periodic (in i direction) do the following
@@ -459,48 +459,50 @@ void setRHS(Vector<LevelData<FArrayBox>* > a_U,                                 
         {
           FArrayBox& thisRhs = levelRhs[levelDit];                               // Dummy thisRhs for the iteration of this level
 
-              thisRhs.setVal(0.0);                                               // Start by setting everything to 0
+          thisRhs.setVal(0.0);                                               // Start by setting everything to 0
 
-              BoxIterator bit(thisRhs.box());                                    // Loop over the IntVects of a Box
-              for (bit.begin(); bit.ok(); ++bit)
-                {
-                  IntVect iv = bit();                                            // IntVect = vector of integers?, numbers corresponding to grids cells in one direction
-                  RealVect loc(iv);                                              // RealVect = vector of real values?, coordinate location of each cell?
-                  loc *= a_dx[lev];
-                  loc += ccOffset;
+          BoxIterator bit(thisRhs.box());                                    // Loop over the IntVects of a Box
+          for (bit.begin(); bit.ok(); ++bit)
+            {
+              IntVect iv = bit();                                            // IntVect = vector of integers?, numbers corresponding to grids cells in one direction
+              RealVect loc(iv);                                              // RealVect = vector of real values?, coordinate location of each cell?
+              loc *= a_dx[lev];
+              loc += ccOffset;
 
-                  RealVect dist = loc - center[n];                               //defining the distance of a location from the center?
+              RealVect dist = loc - center[n];                               //defining the distance of a location from the center?
 
-                  Real val = 0.0;
-                  thisRhs(iv,0) += a_U(iv,RHO);
-                     }
-                 }
-             }
+              Real val = 0.0;
+              thisRhs(iv,0) += a_U(iv,RHO);                                  // This looks right, but I am confused by all the different U containers
+            }
          } // end loop over grids on this level
      } // end loop over levels
  }
 
 
 void setupGrids(Vector<DisjointBoxLayout>& a_grids,                              // uncertain whether I will need to setup my own grid, but
-            Vector<ProblemDomain>& a_domains,                                    // this will be good for completeness sake
-            Vector<int>& a_ref_ratio,                                            // grid parameters are already defined in other areas of
-            Vector<Real>& a_dx,                                                  // PLUTO Chombo and if this setup is just to define the bounds
-            int& a_finestLevel)                                                  // of the box then I already have that. I guess I just need to know
+                Vector<ProblemDomain>& a_domains,                                // this will be good for completeness sake
+                Vector<int>& a_ref_ratio,                                        // grid parameters are already defined in other areas of
+                Vector<Real>& a_dx,                                              // PLUTO Chombo and if this setup is just to define the bounds
+                int& a_finestLevel)                                              // of the box then I already have that. I guess I just need to know
 {                                                                                // if I should 'generate' a new grid or 'reuse' the old structure?
    CH_TIME("setupGrids");
 
    a_finestLevel = 0;
 
    // get grid generation parameters
-   int maxLevel, maxBoxSize, blockFactor;                                        // parameters to be read from file
-   Real fillRatio;                                                               // These parameters should be already provided somewhere
+//   int maxLevel, maxBoxSize, blockFactor;                                        // parameters to be read from file
+//   Real fillRatio;                                                               // These parameters should be already provided somewhere; for now define them
+   int maxLevel = 2;
+   int maxBoxSize = 10000;
+   int blockFactor =8;
+   Real fillRatio = 0.85;
 
    // note that there only need to be numLevels-1 refinement ratios
-   a_ref_ratios.resize(maxLevel);                                                // This confuses me, ut seems like there are ususally numLevels+1 ratios
-
-   Vector<int>  is_periodic_int;                                                 // periodicity of the boundaries in each direction
+   a_ref_ratios.resize(maxLevel);                                                // This confuses me, it seems like there are ususally numLevels+1 ratios
+                                                                                 // AHA! maxlevel refers to the number of levels allowed, not necesarily the number used
+   Vector<int>  is_periodic_int;                                                 // periodicity of the boundaries in each direction, not sure if that is the correct input
    bool is_periodic[SpaceDim];
-   ppGrids.getarr("is_periodic", is_periodic_int, 0, SpaceDim);
+//   ppGrids.getarr("is_periodic", is_periodic_int, 0, SpaceDim);
    for (int dir=0; dir<SpaceDim; dir++)
      {
        is_periodic[dir] = (is_periodic_int[dir] == 1);
@@ -778,8 +780,8 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
 
 
  void setupSolver(AMRMultiGrid<LevelData<FArrayBox> > *a_amrSolver,              // Name of the solver
-             LinearSolver<LevelData<FArrayBox> >& a_bottomSolver,                //
-             const Vector<DisjointBoxLayout>& a_grids,                           // Grids for each AMR level
+             LinearSolver<LevelData<FArrayBox> >& a_bottomSolver,                // The bottom solver is what solves the Poisson equation on the coarsest level
+             const Vector<DisjointBoxLayout>& a_grids,                           // Grids for each AMR level (i.e. there are multiple grids per level)
              const Vector<ProblemDomain>& a_domain,                              // Entire domain
              const Vector<int>& a_ref_ratio,                                     // Refinement ratios between levels
              const Vector<Real>& a_dx,                                           // *** dx: not sure what this value is atm
@@ -787,7 +789,7 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
  {
    CH_TIME("setupSolver");                                                       // Timing diagnostic
 
-   ParmParse ppSolver("solver");                                                 // ??? WHere does ppSolver come from? Parse parameter information from input files
+//   ParmParse ppSolver("solver");                                                 // ??? WHere does ppSolver come from? Parse parameter information from input files
 
    int numLevels = a_finestLevel+1;                                              // 0 index count of total levels
 
@@ -795,37 +797,42 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
 
    // solving poisson problem here
    Real alpha =0.0;                                                              // Constants which determine form of the Poisson equation
-   Real beta = 1.0;                                                              // \beta will be 1/(4*\pi*G) in cgs or code units?
+   Real beta = 1.0/(4*3.14159265);                                               // \beta will be 1/(4*\pi*G) in cgs or code units? For now, G=1
 
    opFactory.define(a_domain[0],                                                 // Define the parameters that go into each instance of opFactory
-                    a_grids,
-                    a_ref_ratio,
-                    a_dx[0],
+                    a_grids,                                                     // Defining these parameters is the whole point of setupGrids, but these
+                    a_ref_ratio,                                                 // are already defined by the main part of PLUTO-Chombo
+                    a_dx[0],                                                     // so setupGrids is probably unnecessary.
                     &ParseBC, alpha, beta);
 
-   AMRLevelOpFactory<LevelData<FArrayBox> >& castFact = (AMRLevelOpFactory<LevelData<FArrayBox> >& ) opFactory;  // ??? dummy?
+   AMRLevelOpFactory<LevelData<FArrayBox> >& castFact = (AMRLevelOpFactory<LevelData<FArrayBox> >& ) opFactory;  // ??????????
 
    a_amrSolver->define(a_domain[0], castFact,                                    // Define
                       &a_bottomSolver, numLevels);
 
    // multigrid solver parameters                                                // Parameters for solving over multiple levels ???
-   int numSmooth, numMG, maxIter;                                                // So ParmParse look into the 'inputs' file and for in the instance
-   Real eps, hang;                                                               // ppSolver, extracts all values on lines which start with 'solver.'
-   ppSolver.get("num_smooth", numSmooth);                                        // and returns the values for the respective variable names
-   ppSolver.get("num_mg",     numMG);
-   ppSolver.get("max_iterations", maxIter);
-   ppSolver.get("tolerance", eps);
-   ppSolver.get("hang",      hang);
+//   int numSmooth, numMG, maxIter;                                                // So ParmParse look into the 'inputs' file and for in the instance
+//   Real eps, hang;                                                               // ppSolver, extracts all values on lines which start with 'solver.'
+   int numSmooth = 4;
+   int numMG = 1;
+   int maxIter = 100;
+   Real eps = 1.0e-9;
+   Real hang = 1.0e-10;
+//   ppSolver.get("num_smooth", numSmooth);                                        // and returns the values for the respective variable names
+//   ppSolver.get("num_mg",     numMG);
+//   ppSolver.get("max_iterations", maxIter);                                      // Since I will not be reading any of this from file I will have to define it
+//   ppSolver.get("tolerance", eps);
+//   ppSolver.get("hang",      hang);
 
-   Real normThresh = 1.0e-30;                                                    // What is this threshold?
+   Real normThresh = 1.0e-30;                                                    // What is this threshold? Look to the a_amrSolver
    a_amrSolver->setSolverParameters(numSmooth, numSmooth, numSmooth,             // Input all the parameters
                                 numMG, maxIter, eps, hang, normThresh);
    a_amrSolver->m_verbosity = s_verbosity-1;
 
    // optional parameters
-   ppSolver.query("num_pre", a_amrSolver->m_pre);
-   ppSolver.query("num_post", a_amrSolver->m_post);
-   ppSolver.query("num_bottom", a_amrSolver->m_bottom);
+//   ppSolver.query("num_pre", a_amrSolver->m_pre);
+//   ppSolver.query("num_post", a_amrSolver->m_post);
+//   ppSolver.query("num_bottom", a_amrSolver->m_bottom);
  }
 
  int runSolver()                                                                 // Now that everything is set up (???) calculate the potential
@@ -833,9 +840,10 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
    CH_TIME("runSolver");                                                         // time keeping diagnostic
 
    int status = 0, mg_type = 0;                                                  // ???
-   ParmParse ppMain("main");
+//   ParmParse ppMain("main");
 
-   ppMain.query("verbosity", s_verbosity);                                       // Noisiness control ???
+//   ppMain.query("verbosity", s_verbosity);                                     // Noisiness control ???
+   int s_verbosity = 4;
 
    // set up grids&
    Vector<DisjointBoxLayout> grids;                                              // define non-temporary structures ... ???
@@ -844,10 +852,10 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
    Vector<Real> dx;
    int finestLevel;
 
-   setupGrids(amrGrids, amrDomains, refRatios, amrDx, finestLevel);              // ... to create the domain and AMR blocks/boxes ???
+   setupGrids(amrGrids, amrDomains, refRatios, amrDx, finestLevel);              // but here setupGrids is called to do what? If all of these parameters are defined ...
 
    // initialize solver
-   AMRMultiGrid<LevelData<FArrayBox> > *amrSolver;                               // Not a_amrSolver? Where is amrSolver defined?
+   AMRMultiGrid<LevelData<FArrayBox> > *amrSolver;                               // Not a_amrSolver? Where is amrSolver defined? And why a pointer?
    if ( mg_type==0 )
      {
        amrSolver = new AMRMultiGrid<LevelData<FArrayBox> >();                    // ???
@@ -885,7 +893,7 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
 
    for (int lev=0; lev<=finestLevel; lev++)                                      // Loop over all AMR levels
      {
-       const DisjointBoxLayout& levelGrids = amrGrids[lev];                      // level dummy
+       const DisjointBoxLayout& levelGrids = amrGrids[lev];                      // lev = level dummy
        phi[lev] = new LevelData<FArrayBox>(levelGrids, 1, IntVect::Unit);        // create space for \phi data for each level
        rhs[lev] = new LevelData<FArrayBox>(levelGrids, 1, IntVect::Zero);        // create space for \rho date for each level
        resid[lev] = new LevelData<FArrayBox>(levelGrids, 1, IntVect::Zero);      // create space for residual for each level
@@ -895,7 +903,7 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
                                                                                  // or was that just the rules and parameters and this is the execution?
    // do solve
    int iterations = 1;
-   ppMain.get("iterations", iterations);                                         // ppMain = ???
+//   ppMain.get("iterations", iterations);                                         // ppMain = ???
 
    for (int iiter = 0; iiter < iterations; iiter++)                              // interate over
      {
@@ -914,8 +922,8 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
 *
 */
 
-   bool writePlots = true;
-   ppMain.query("writePlotFiles", writePlots);
+   bool writePlots = false;
+//   ppMain.query("writePlotFiles", writePlots);
 
 #ifdef CH_USE_HDF5
 
@@ -984,90 +992,4 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
    return status;
 }
 
-/* ********************************************************** */
-/*void solveSelfGravPot(Vector<LevelData<FArrayBox>* >& a_gravpot,       // Output self-gravity potential: m_gravpot
-                      const Vector<LevelData<FArrayBox>* > a_U,  // Input density: m_UNew
-                      const Vector<DisjointBoxLayout>& a_grids,    // Grid geometries at all levels:
-                      const Vector<int>& m_ref_ratios,              // Refinement ratios between levels: m_ref_ratio
-                      const ProblemDomain& a_domain,         // Coarsest domain: m_domain
-                      Real alpha, Real beta, Real a_dx)    // constants alpha=0, beta=1/(4*pi*G)
-/*
- * Example from the Chombo documentation:
- *
- * solveSelfGravPot solves (alpha I + beta Laplacian) phi = rhs
- * using AMRMultiGrid and AMRPoissonOp
- * Inputs:
- *  rhs: Right-hand side of the solve over the level.
- *  grids: AMRHierarchy of grids
- *  refRatio: refinement ratios
- *  level0Domain: domain at the coarsest AMR level
- *  coarsestDx: grid spacing at the coarsest level
- *  alpha: identity coefficient
- *  beta: Laplacian coefficient
- * Outputs:
- *  phi = (alpha I + beta Lapl)^{-1}(rhs)
- *
- ************************************************************ */
-/*{
-int numlevels = a_U.size(); // A different array for each refinement level
-
-//define the operator factory
-AMRPoissonOpFactory opFactory;
-opFactory.define(m_domain,
-                 m_grids, m_ref_ratios, m_dx,
-                 &ParseBC, alpha, beta);
-
-//this is the solver we shall use
-AMRMultiGrid<LevelData<FArrayBox> > solver;
-
-//this is the solver for the bottom of the muligrid v-cycle (So this is the solver on the coarsest grid?)
-BiCGStabSolver<LevelData<FArrayBox> > bottomSolver;
-
-//bicgstab can be noisy
-bottomSolver.m_verbosity = 0;
-
-//define the solver
-solver.define(m_domain, opFactory, &bottomSolver, numlevels);
-
-//we want to solve over the whole hierarchy
-int lbase = 0;
-
-//so solve already.
-solver.solve(m_gravpot, m_U, numlevels-1, lbase);
-}
-*/
-
-/*
-// Loop over the patches of a level to assign initial conditions
-void PatchPluto::initiate(LevelData<FArrayBox>& a_gravpot)
-{
-
- CH_assert(m_isDefined);
-
-// DataIterator does what?
- DataIterator dit = a_gravpot.boxLayout().dataIterator();
-
- // Iterator for all grids in this level
- for (dit.begin(); dit.ok(); ++dit)
-  {
-    // Storage for current grid
-    FArrayBox& U = a_gravpot[dit()];   // Not U, but what?
-    // Set up initial conditions in this patch
-    starter(U);                        // NOt U, but what?
-  }
-}
-*/
-
-/* Calling procedure should look like:
- void solveSelfGravPot(m_gravpot,            // Output self-gravity potential
-                       m_U,                  // Input density: m_UNew
-                       m_grids,              // Grid geometries
-                       m_ref_ratio,          // Vector defining refinement ratios between levels
-                       m_domain,             // THe entire domain without refinement: the base grid
-                       alpha=0.0,            // No identity term
-                       beta=1.193E9,         // beta=1/(4*pi*G)
-                       m_dx)                 // coarsest grid spacing
- */
-
-// Clean up and close up shop
 // Output gravpot [phi] and acceleration [-grad(phi)]: used by PLUTO/Src/HD/prim_eqn.c
