@@ -692,7 +692,7 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
      {
        bool zeroInitialGuess = true;
        pout() << "about to go into solve" << endl;
-       amrSolver->solve(phi, a_U(iv,RHO), level, 0, zeroInitialGuess);           // Here is where it is all put together
+       amrSolver->solve(phi, rhs, level, 0, zeroInitialGuess);           // Here is where it is all put together
        pout() << "done solve" << endl;
      }
 
