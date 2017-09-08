@@ -289,7 +289,7 @@ void setRHS(Vector<LevelData<FArrayBox>* > a_U,                                 
      } // end loop over levels
  }
 
-
+#if 0
 void setupGrids(Vector<DisjointBoxLayout>& a_grids,                              // uncertain whether I will need to setup my own grid, but
                 Vector<ProblemDomain>& a_domains,                                // this will be good for completeness sake
                 Vector<int>& a_ref_ratio,                                        // grid parameters are already defined in other areas of
@@ -581,14 +581,15 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
 
 
 }
+#endif
 
  void setupSolver(AMRMultiGrid<LevelData<FArrayBox> > *a_amrSolver,              // Name of the solver
              LinearSolver<LevelData<FArrayBox> >& a_bottomSolver,                // The bottom solver is what solves the Poisson equation on the coarsest level
              const Vector<DisjointBoxLayout>& a_grids,                           // Grids for each AMR level (i.e. there are multiple grids per level)
              const Vector<ProblemDomain>& a_domain,                              // Entire domain
              const Vector<int>& a_ref_ratio,                                     // Refinement ratios between levels
-             const Vector<Real>& a_dx,                                           // *** dx: not sure what this value is atm
-             int a_level)                                                        // *** number of most refined level
+             const Vector<Real>& a_dx,                                           // grid spacing
+             int a_level)                                                        // number of most refined level
  {
    CH_TIME("setupSolver");                                                       // Timing diagnostic
 
@@ -638,7 +639,7 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
 //   ppSolver.query("num_bottom", a_amrSolver->m_bottom);
  }
 
- int runSolver()                                                                 // Now that everything is set up (???) calculate the potential
+ int runSolver()                                                                 // Now that everything is set up calculate the potential
  {
    CH_TIME("runSolver");                                                         // time keeping diagnostic
 
@@ -649,19 +650,19 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
    int s_verbosity = 4;
 
    // set up grids&
-   Vector<DisjointBoxLayout> grids;                                              // define non-temporary structures ... ???
-   Vector<ProblemDomain> domain;
-   Vector<int> ref_ratio;
-   Vector<Real> dx;
-   int level;
+//   Vector<DisjointBoxLayout> grids;                                              // define non-temporary structures ... ???
+//   Vector<ProblemDomain> domain;
+//   Vector<int> ref_ratio;
+//   Vector<Real> dx;
+//   int level;
 
-   setupGrids(amrGrids, amrDomains, refRatios, amrDx, level);              // but here setupGrids is called to do what? If all of these parameters are defined ...
+//   setupGrids(amrGrids, amrDomains, refRatios, amrDx, level);                    // but here setupGrids is called to do what? If all of these parameters are defined ...
 
    // initialize solver
    AMRMultiGrid<LevelData<FArrayBox> > *amrSolver;                               // Not a_amrSolver? Where is amrSolver defined? And why a pointer?
    if ( mg_type==0 )
      {
-       amrSolver = new AMRMultiGrid<LevelData<FArrayBox> >();                    // ???
+       amrSolver = new AMRMultiGrid<LevelData<FArrayBox> >();                    // This is the solver over
      }
    else
      {
@@ -688,21 +689,21 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
 
 
    // allocate solution and RHS, initialize RHS
-   int numLevels = amrGrids.size();                                              // Set up containers
+   int numLevels = grids.size();                                                 // Set up containers
    Vector<LevelData<FArrayBox>* > phi(numLevels, NULL);                          // \phi container
    Vector<LevelData<FArrayBox>* > rhs(numLevels, NULL);                          // \rho container
    // this is for convenience
-   Vector<LevelData<FArrayBox>* > resid(numLevels, NULL);                        // ??? residual calculation
+   Vector<LevelData<FArrayBox>* > resid(numLevels, NULL);                        // residual container
 
-   for (int lev=0; lev<=level; lev++)                                      // Loop over all AMR levels
+   for (int lev=0; lev<=level; lev++)                                            // Loop over all AMR levels
      {
-       const DisjointBoxLayout& levelGrids = amrGrids[lev];                      // lev = level dummy
+       const DisjointBoxLayout& levelGrids = grids[lev];                         // lev = level dummy
        phi[lev] = new LevelData<FArrayBox>(levelGrids, 1, IntVect::Unit);        // create space for \phi data for each level
        rhs[lev] = new LevelData<FArrayBox>(levelGrids, 1, IntVect::Zero);        // create space for \rho date for each level
        resid[lev] = new LevelData<FArrayBox>(levelGrids, 1, IntVect::Zero);      // create space for residual for each level
      }
 
-   setRHS(rhs, domain, ref_ratio, dx, level );                             // set the RHS, wasn't this done in the beginning already?
+   setRHS(rhs, domain, ref_ratio, dx, level );                                   // set the RHS, wasn't this done in the beginning already?
                                                                                  // or was that just the rules and parameters and this is the execution?
    // do solve
    int iterations = 1;
@@ -712,7 +713,7 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
      {
        bool zeroInitialGuess = true;
        pout() << "about to go into solve" << endl;
-       amrSolver->solve(phi, rhs, level, 0, zeroInitialGuess);             // Here is where it is all put together
+       amrSolver->solve(phi, rhs, level, 0, zeroInitialGuess);                   // Here is where it is all put together
        pout() << "done solve" << endl;
      }
 

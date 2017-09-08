@@ -29,9 +29,6 @@ using std::ios;
 #include "CH_Attach.H"
 #endif
 
-#include "FABView.H"
-
-#include "ParmParse.H"
 #include "CH_HDF5.H"
 #include "parstream.H"
 #include "CH_Timer.H"
@@ -99,55 +96,18 @@ virtual void ParseBC(FArrayBox& a_state,                                        
                      Real a_dx,                                                          // without grid data is this just the coarse dx
                      bool a_homogeneous);
 
-virtual static void DampDiriBC( FArrayBox&      a_state,                                 // State is the value of \phi with in the box a_valid
-                                const Box&      a_valid,                                 // Box around which BCs are constructed
-                                const ProblemDomain& a_domain,                           // Coarsest grid domain
-                                int             a_ratio,                                 // grid refinement ratio
-                                int             a_dir,                                   // ???
-                                Side::LoHiSide  a_side,                                  // Which side of the domain?
-                                Interval&       a_interval                               // ???
-                              );
-
-virtual void DampBC( FArrayBox& a_state,                                                 // See above for arguments
-                     const Box& a_valid,
-                     const ProblemDomain& a_domain,
-                     Real a_dx,
-                     int a_ratio );
-
-virtual extern void convDiriBC_RBGS( FArrayBox&      a_state,
-                                     const FArrayBox& a_rhs,
-                                     const Box&      a_valid,
-                                     const ProblemDomain& a_domain,
-                                     Real a_dx,
-                                     int             a_whichpass,                        // ??? Which part of the v-cycle one is in?
-                                     int             a_dir,
-                                     Side::LoHiSide  a_side);
-
-virtual void convergeGS_BC( FArrayBox& a_state,
-                            const FArrayBox& a_rhs,
-                            const Box& a_valid,
-                            const ProblemDomain& a_domain,
-                            Real a_dx,
-                            int a_whichpass );
-
-virtual void setupGrids(Vector<DisjointBoxLayout>& a_grids,                           // uncertain whether I will need to setup my own grid, but
-                        Vector<ProblemDomain>& a_domains,                                 // this will be good for completeness sake
-                        Vector<int>& a_ref_ratio,
-                        Vector<Real>& a_dx,
-                        int& a_finestLevel); 
-
 virtual int runSolver();
 
-virtual void setupSolver(AMRMultiGrid<LevelData<FArrayBox> >        *a_amrSolver,           // Name of the solver
-                         LinearSolver<LevelData<FArrayBox> >&       a_bottomSolver,         //
+virtual void setupSolver(AMRMultiGrid<LevelData<FArrayBox> >        *a_amrSolver,           // Name of the Multigrid solver
+                         LinearSolver<LevelData<FArrayBox> >&       a_bottomSolver,         // Solver at the bottom of the V-cycle
                          const Vector<DisjointBoxLayout>&           a_grids,                // Grids for each AMR level
                          const Vector<ProblemDomain>&               a_domain,               // Entire domain
                          const Vector<int>&                         a_ref_ratio,            // Refinement ratios between levels
-                         const Vector<Real>&                        a_amrDx,                // *** dx: not sure what this value is atm
-                         int                                        a_finestLevel);         // *** number of most refined level
+                         const Vector<Real>&                        a_amrDx,                // grid spacing
+                         int                                        a_finestLevel);         // number of most refined level
 
 virtual void setRHS(Vector<LevelData<FArrayBox>* >                  a_rhs,                  // Output array of \rho
                     Vector<ProblemDomain>&                          a_domain,               // Grid domain
                     Vector<int>&                                    m_ref_ratio,            // Refinement ratios between levels
-                    Vector<Real>&                                   a_amrDx,                // *** dx: not sure what this value is atm
-                    int                                             a_finestLevel)          // *** number of most refined level
+                    Vector<Real>&                                   a_amrDx,                // grid spacing
+                    int                                             a_finestLevel);         // number of most refined level
