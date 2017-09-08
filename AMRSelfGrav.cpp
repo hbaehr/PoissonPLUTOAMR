@@ -251,9 +251,9 @@ void ParseBC(FArrayBox& a_state,                                                
 
 void setRHS(Vector<LevelData<FArrayBox>* > a_U,                                  // Output array of \rho: a_U[RHO]?
             Vector<ProblemDomain>& a_domain,                                     // Grid domain
-            Vector<int>& m_ref_ratio,                                            // Refinement ratios between levels
+            Vector<int>& a_ref_ratio,                                            // Refinement ratios between levels
             Vector<Real>& a_dx,                                                  // dx: grid spacing
-            int a_level)                                                         // *** number of most refined level = len(m_level)
+            int a_level)                                                         // number of most refined level = m_level
 {
   CH_TIME("setRHS");
 
@@ -614,19 +614,12 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
    a_amrSolver->define(a_domain[0], castFact,                                    // Define
                       &a_bottomSolver, numLevels);
 
-   // multigrid solver parameters                                                // Parameters for solving over multiple levels ???
-//   int numSmooth, numMG, maxIter;                                              // So ParmParse look into the 'inputs' file and for in the instance
-//   Real eps, hang;                                                             // ppSolver, extracts all values on lines which start with 'solver.'
+   // Multigrid solver parameters
    int numSmooth = 4;
    int numMG = 1;
    int maxIter = 100;
    Real eps = 1.0e-9;
    Real hang = 1.0e-10;
-//   ppSolver.get("num_smooth", numSmooth);                                      // and returns the values for the respective variable names
-//   ppSolver.get("num_mg",     numMG);
-//   ppSolver.get("max_iterations", maxIter);                                    // Since I will not be reading any of this from file I will have to define it
-//   ppSolver.get("tolerance", eps);
-//   ppSolver.get("hang",      hang);
 
    Real normThresh = 1.0e-30;                                                    // What is this threshold? Look to the a_amrSolver
    a_amrSolver->setSolverParameters(numSmooth, numSmooth, numSmooth,             // Input all the parameters
@@ -644,25 +637,14 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
    CH_TIME("runSolver");                                                         // time keeping diagnostic
 
    int status = 0, mg_type = 0;                                                  // ???
-//   ParmParse ppMain("main");
 
-//   ppMain.query("verbosity", s_verbosity);                                     // Noisiness control ???
    int s_verbosity = 4;
-
-   // set up grids&
-//   Vector<DisjointBoxLayout> grids;                                              // define non-temporary structures ... ???
-//   Vector<ProblemDomain> domain;
-//   Vector<int> ref_ratio;
-//   Vector<Real> dx;
-//   int level;
-
-//   setupGrids(amrGrids, amrDomains, refRatios, amrDx, level);                    // but here setupGrids is called to do what? If all of these parameters are defined ...
 
    // initialize solver
    AMRMultiGrid<LevelData<FArrayBox> > *amrSolver;                               // Not a_amrSolver? Where is amrSolver defined? And why a pointer?
    if ( mg_type==0 )
      {
-       amrSolver = new AMRMultiGrid<LevelData<FArrayBox> >();                    // This is the solver over
+       amrSolver = new AMRMultiGrid<LevelData<FArrayBox> >();                    // This is the solver from one level to another
      }
    else
      {
@@ -695,19 +677,18 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
    // this is for convenience
    Vector<LevelData<FArrayBox>* > resid(numLevels, NULL);                        // residual container
 
-   for (int lev=0; lev<=level; lev++)                                            // Loop over all AMR levels
+   for (int lev=0; lev<=level; lev++)                                            // Not sure how to loop over the AMR levels when PLUTO doesn't, maybe a different container?
      {
        const DisjointBoxLayout& levelGrids = grids[lev];                         // lev = level dummy
        phi[lev] = new LevelData<FArrayBox>(levelGrids, 1, IntVect::Unit);        // create space for \phi data for each level
-       rhs[lev] = new LevelData<FArrayBox>(levelGrids, 1, IntVect::Zero);        // create space for \rho date for each level
+//       rhs[lev] = new LevelData<FArrayBox>(levelGrids, 1, IntVect::Zero);        // create space for \rho date for each level
        resid[lev] = new LevelData<FArrayBox>(levelGrids, 1, IntVect::Zero);      // create space for residual for each level
      }
 
-   setRHS(rhs, domain, ref_ratio, dx, level );                                   // set the RHS, wasn't this done in the beginning already?
+//   setRHS(rhs, domain, ref_ratio, dx, level );                                   // set the RHS, wasn't this done in the beginning already?
                                                                                  // or was that just the rules and parameters and this is the execution?
    // do solve
    int iterations = 1;
-//   ppMain.get("iterations", iterations);                                       // ppMain = ???
 
    for (int iiter = 0; iiter < iterations; iiter++)                              // interate over
      {

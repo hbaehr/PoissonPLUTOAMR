@@ -63,28 +63,6 @@ using std::ios;
 static void enableFpExceptions();
 #endif
 
-//virtual void initiate(LevelData<FArrayBox>& a_gravpot);
-
-//virtual void starter(LevelData<FArrayBox>& a_gravpot);
-
-/*virtual void solveSelfGravPot(Vector<LevelData<FArrayBox>*>&       a_gravpot,
-                              Vector<LevelData<FArrayBox>*>        a_U,
-                              const Vector<DisjointBoxLayout>&     a_grids,
-                              const Vector<int>&                   m_ref_ratio,
-                              const ProblemDomain&                 a_domain,
-                              Real                                 alpha=0.0,
-                              Real                                 beta=1.193E9, // This should perhaps be problem defined
-                              Real                                 a_dx);
-
-/* **********************************************************
-void solveElliptic(Vector<LevelData<FArrayBox>* >& phi,         // Output self-gravity potential: m_gravpot
-                   const Vector<LevelData<FArrayBox>* > rhs,    // Input density: m_UNew
-                   const Vector<DisjointBoxLayout>& grids,      // Grid geometries: m_ref_ratio
-                   const Vector<int>& refRatios,                // Vector defining refinement ratios between levels
-                   const ProblemDomain& level0Domain,           //
-                   Real alpha, Real beta, Real coarsestDx)      // constants alpha=0, beta=1/(4*pi*G)
-*/
-
 virtual void ParseValue(Real* pos,                                                       // Looks like this would normally parse a BC value settings from a file
                         int* dir,                                                        // dir = direction? as in dimension 1,2,3?
                         Side::LoHiSide* side,                                            // Which side of the coordinate boundary?
