@@ -74,6 +74,18 @@ virtual void ParseBC(FArrayBox& a_state,                                        
                      Real a_dx,                                                          // without grid data is this just the coarse dx
                      bool a_homogeneous);
 
+virtual void setRHS(Vector<LevelData<FArrayBox>* > rhs,                                  // Output array of \rho: a_U[RHO]?
+                    Vector<ProblemDomain>& a_domain,                                     // Grid domain
+                    Vector<int>& a_ref_ratio,                                            // Refinement ratios between levels
+                    Vector<Real>& a_dx,                                                  // dx: grid spacing
+                    int a_level);                                                        // number of most refined level = m_level
+
+virtual void setupGrids(Vector<DisjointBoxLayout>& a_grids,                              // uncertain whether I will need to setup my own grid, but
+                        Vector<ProblemDomain>& a_domains,                                // this will be good for completeness sake
+                        Vector<int>& a_ref_ratio,                                        // grid parameters are already defined in other areas of
+                        Vector<Real>& a_dx,                                              // PLUTO Chombo and if this setup is just to define the bounds
+                        int& a_level);                                                   // of the box then I already have that. I guess I just need to know
+
 virtual int runSolver();
 
 virtual void setupSolver(AMRMultiGrid<LevelData<FArrayBox> >        *a_amrSolver,           // Name of the Multigrid solver

@@ -249,7 +249,7 @@ void ParseBC(FArrayBox& a_state,                                                
 *
 */
 
-void setRHS(Vector<LevelData<FArrayBox>* > a_U,                                  // Output array of \rho: a_U[RHO]?
+void setRHS(Vector<LevelData<FArrayBox>* > a_rhs,                                // Output array of \rho: a_U[RHO]?
             Vector<ProblemDomain>& a_domain,                                     // Grid domain
             Vector<int>& a_ref_ratio,                                            // Refinement ratios between levels
             Vector<Real>& a_dx,                                                  // dx: grid spacing
@@ -259,11 +259,11 @@ void setRHS(Vector<LevelData<FArrayBox>* > a_U,                                 
 
   for (int lev=0; lev<=a_level; lev++)                                           // Looping over all levels; PLUTO does not loop over levels ...
     {
-      LevelData<FArrayBox>& levelRhs = *(a_U(lev));                              // Each a_rhs[lev] is an FArrayBox temporarily stored as levelRhs
+      LevelData<FArrayBox>& levelRhs = *(a_rhs[lev]);                            // Each a_rhs[lev] is an FArrayBox temporarily stored as levelRhs
       const DisjointBoxLayout& levelGrids = levelRhs.getBoxes();                 // Get box indeces for each level
 
       // rhs is cell-centered...
-      RealVect ccOffset = 0.5*a_dx[lev]*RealVect::Unit;                          // Adjust for the cell-centered location of the data // lev in PLUTO =?
+//      RealVect ccOffset = 0.5*a_dx[lev]*RealVect::Unit;                        // Adjust for the cell-centered location of the data // lev in PLUTO =?
 
       DataIterator levelDit = levelGrids.dataIterator();                         // Write data to a level
       for (levelDit.begin(); levelDit.ok(); ++levelDit)                          // Iterate over all points on the level?
@@ -289,7 +289,6 @@ void setRHS(Vector<LevelData<FArrayBox>* > a_U,                                 
      } // end loop over levels
  }
 
-#if 0
 void setupGrids(Vector<DisjointBoxLayout>& a_grids,                              // uncertain whether I will need to setup my own grid, but
                 Vector<ProblemDomain>& a_domains,                                // this will be good for completeness sake
                 Vector<int>& a_ref_ratio,                                        // grid parameters are already defined in other areas of
@@ -581,7 +580,6 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
 
 
 }
-#endif
 
  void setupSolver(AMRMultiGrid<LevelData<FArrayBox> > *a_amrSolver,              // Name of the solver
              LinearSolver<LevelData<FArrayBox> >& a_bottomSolver,                // The bottom solver is what solves the Poisson equation on the coarsest level
@@ -694,7 +692,7 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
      {
        bool zeroInitialGuess = true;
        pout() << "about to go into solve" << endl;
-       amrSolver->solve(phi, rhs, level, 0, zeroInitialGuess);                   // Here is where it is all put together
+       amrSolver->solve(phi, a_U(iv,RHO), level, 0, zeroInitialGuess);           // Here is where it is all put together
        pout() << "done solve" << endl;
      }
 
