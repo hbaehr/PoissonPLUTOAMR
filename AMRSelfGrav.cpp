@@ -23,9 +23,6 @@ using std::ios;
 #include "CH_Attach.H"
 #endif
 
-#include "FABView.H"
-
-#include "ParmParse.H"
 #include "CH_HDF5.H"
 #include "parstream.H"
 #include "CH_Timer.H"
@@ -62,9 +59,8 @@ static void enableFpExceptions();
 
 // Other things which need to be addressed:
 // 1) Boundary conditions
-// 2) Initial conditions
-// 3) Fill the ghost zones of m_gravpot or a_gravpot by interpolation? see LevelPluto for more info
-// 4) Go through each input from PLUTO and decide whether they should be  temporary 'm_' or permanent 'a_' for now they are all 'a_'
+// 2) Fill the ghost zones of m_gravpot or a_gravpot by interpolation? see LevelPluto for more info
+// 3) Go through each input from PLUTO and decide whether they should be  temporary 'm_' or permanent 'a_' for now they are all 'a_'
 
 /*
 * A few notes:
@@ -102,11 +98,12 @@ RealVect          GlobalBCRS::s_trigvec = RealVect::Zero;
 bool              GlobalBCRS::s_areBCsParsed= false;
 bool              GlobalBCRS::s_valueParsed= false;
 bool              GlobalBCRS::s_trigParsed= false;
+Real bcVal=0.0;
 
 void ParseValue(Real* pos,                                                       // Looks like this would normally parse a BC value settings from a file
                 int* dir,                                                        // dir = direction? as in dimension 1,2,3?
                 Side::LoHiSide* side,                                            // Which side of the coordinate boundary?
-                Real* a_values)                                                  // ??? boundary values
+                Real* a_values)                                                  // This must be the boundary function and it = 0.0
 {
   //  ParmParse pp;
   //Real bcVal;
@@ -176,7 +173,7 @@ void ParseBC(FArrayBox& a_state,                                                
                              valid,                                              // subdomain box
                              a_dx,                                               // explanatory
                              true,                                               // Heh?
-                             ParseValue,                                         // ???
+                             ParseValue,                                         // This is just a_value=0.0, right?
                              i,                                                  // ???
                              Side::Lo,                                           // Lo boundary
                              1);                                                 // ???
@@ -239,7 +236,7 @@ void ParseBC(FArrayBox& a_state,                                                
 }
 
 //#ifdef FAS_HACKS
-#if 0
+#if 0                                                                            // This is a all commented out unil #endif!
 /***********************************************************************
    DampBC helper                                                                 // Reminder: Dirichlet conditions mean u=c at boundary, rather than du/dx=c
 ***********************************************************************/         // Everything beyond here still functions but this editor is weird
