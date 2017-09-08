@@ -253,11 +253,11 @@ void setRHS(Vector<LevelData<FArrayBox>* > a_U,                                 
             Vector<ProblemDomain>& a_domain,                                     // Grid domain
             Vector<int>& m_ref_ratio,                                            // Refinement ratios between levels
             Vector<Real>& a_dx,                                                  // dx: grid spacing
-            int a_finestLevel)                                                   // *** number of most refined level = len(m_level)
+            int a_level)                                                         // *** number of most refined level = len(m_level)
 {
   CH_TIME("setRHS");
 
-  for (int lev=0; lev<=a_finestLevel; lev++)                                     // Looping over all levels
+  for (int lev=0; lev<=a_level; lev++)                                           // Looping over all levels; PLUTO does not loop over levels ...
     {
       LevelData<FArrayBox>& levelRhs = *(a_U(lev));                              // Each a_rhs[lev] is an FArrayBox temporarily stored as levelRhs
       const DisjointBoxLayout& levelGrids = levelRhs.getBoxes();                 // Get box indeces for each level
@@ -294,11 +294,11 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
                 Vector<ProblemDomain>& a_domains,                                // this will be good for completeness sake
                 Vector<int>& a_ref_ratio,                                        // grid parameters are already defined in other areas of
                 Vector<Real>& a_dx,                                              // PLUTO Chombo and if this setup is just to define the bounds
-                int& a_finestLevel)                                              // of the box then I already have that. I guess I just need to know
+                int& a_level)                                                    // of the box then I already have that. I guess I just need to know
 {                                                                                // if I should 'generate' a new grid or 'reuse' the old structure?
    CH_TIME("setupGrids");
 
-   a_finestLevel = 0;
+   a_level = 0;
 
    // get grid generation parameters
 //   int maxLevel, maxBoxSize, blockFactor;                                      // parameters to be read from file
@@ -339,7 +339,7 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
    a_grids.resize(maxNumLevels);
    a_domain.resize(maxNumLevels);
    a_dx.resize(maxNumLevels,-1);
-   a_finestLevel = 0;
+   a_level = 0;
 
    // assumes dx=dy=dz                                                           // This assumption will not hold in PLUTO, but I should check
    a_dx[0] = domainSize[0]/numCells[0];                                          // where they are defined in the main code
@@ -428,7 +428,7 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
                Vector<int>  proc(boxes.size());
                LoadBalance(proc,boxes);
                a_grids[ilev] = DisjointBoxLayout(boxes, proc, levDomain);        // What is going on here ...
-               a_finestLevel++;                                                  // and here?
+               a_level++;                                                        // and here?
              }
 
          }
@@ -461,8 +461,8 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
              {
                // tag based on grad(rhs)                                         // I am curious to see how the grad is handled, maybe I can make use of it?
                // first need to allocate RHS
-               Vector<LevelData<FArrayBox>* > tempRHS(a_finestLevel+1, NULL);
-               for (int lev=0; lev<= a_finestLevel; lev++)
+               Vector<LevelData<FArrayBox>* > tempRHS(a_level+1, NULL);
+               for (int lev=0; lev<= a_level; lev++)
                  {                                                               // Looping over the levels and creating a temporary RHS from the grid layout
                    // note that we add a ghost cell to simplify gradients        // Note: a SINGLE ghost cell -- Is that what is meant by the '1'?
                    tempRHS[lev] = new LevelData<FArrayBox>(a_grids[lev],
@@ -470,11 +470,11 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
                  }
 
                setRHS(tempRHS, a_domain, a_ref_ratio, a_dx,                      // This is the function that sets up the RHS, only this time on tempRHS !!!!
-                      a_finestLevel);
+                      a_level);
 
-               Vector<IntVectSet> tags(a_finestLevel+1);
+               Vector<IntVectSet> tags(a_level+1);
 
-               for (int lev=0; lev<a_finestLevel+1; lev++)                       // Looping over the AMR levels
+               for (int lev=0; lev<a_level+1; lev++)                             // Looping over the AMR levels
                  {
                    const DisjointBoxLayout& levelGrids = a_grids[lev];
                    const LevelData<FArrayBox>& levelRHS = *tempRHS[lev];
@@ -521,12 +521,12 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
 
 
                // call meshRefine.
-               for (int lev=1; lev<=a_finestLevel; lev++)
+               for (int lev=1; lev<=a_level; lev++)
                  {
                    oldMeshes[lev] = vectBoxes[lev];
                  }
 
-               int topLevel = a_finestLevel;
+               int topLevel = a_level;
                int newFinestLevel =  meshGen.regrid(vectBoxes,                   // And mesh refinement is handled by an external call
                                                     tags,                        // Check how PLUTO does this
                                                     0,
@@ -535,12 +535,12 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
 
 
                // define new grids if necessary and test to see if we're done
-               if (newFinestLevel > a_finestLevel)
+               if (newFinestLevel > a_level)
                  {
-                   a_finestLevel = newFinestLevel;
+                   a_level = newFinestLevel;
 
                    // setup new grid hierarchy
-                   for (int lev=1; lev<=a_finestLevel; lev++)
+                   for (int lev=1; lev<=a_level; lev++)
                      {
                        Vector<int> procAssign(vectBoxes[lev].size(),0);          // More stuff I do not understand. Look into this procAssign stuff
                        LoadBalance(procAssign, vectBoxes[lev]);
@@ -549,14 +549,14 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
                                                     a_domain[lev]);
                        a_grids[lev] = levelGrids;
                      }
-                   if (s_verbosity>2) pout() << "setupGrids: "<< a_finestLevel <<") size " << a_grids[a_finestLevel].size() << endl;
+                   if (s_verbosity>2) pout() << "setupGrids: "<< a_level <<") size " << a_grids[a_level].size() << endl;
                  }
                else
                  {
                    moreLevels = false;
                  }
 
-               if (a_finestLevel == maxLevel)
+               if (a_level == maxLevel)
                  {
                    moreLevels = false;
                  }
@@ -572,7 +572,7 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
          }
 
        // fill in remaining levels with empty DisjointBoxLayouts
-       for (int lev= a_finestLevel+1; lev<=maxLevel; lev++)                      // So would this be the point where non-refined upper levels are filled with nulls?
+       for (int lev= a_level+1; lev<=maxLevel; lev++)                            // So would this be the point where non-refined upper levels are filled with nulls?
          {                                                                       // No, say 5 refinement levels are possible, but only up to lev=3 is used,
            a_grids[lev] = DisjointBoxLayout();                                   // then lev = 4,5 are filled with empty boxes so they do not cause problems
          }
@@ -582,27 +582,19 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
 
 }
 
-/*  Setting up the parameters of the solver
-*
-*
-*
-*
-*/
-
-
  void setupSolver(AMRMultiGrid<LevelData<FArrayBox> > *a_amrSolver,              // Name of the solver
              LinearSolver<LevelData<FArrayBox> >& a_bottomSolver,                // The bottom solver is what solves the Poisson equation on the coarsest level
              const Vector<DisjointBoxLayout>& a_grids,                           // Grids for each AMR level (i.e. there are multiple grids per level)
              const Vector<ProblemDomain>& a_domain,                              // Entire domain
              const Vector<int>& a_ref_ratio,                                     // Refinement ratios between levels
              const Vector<Real>& a_dx,                                           // *** dx: not sure what this value is atm
-             int a_finestLevel)                                                  // *** number of most refined level
+             int a_level)                                                        // *** number of most refined level
  {
    CH_TIME("setupSolver");                                                       // Timing diagnostic
 
 //   ParmParse ppSolver("solver");                                               // ??? WHere does ppSolver come from? Parse parameter information from input files
 
-   int numLevels = a_finestLevel+1;                                              // 0 index count of total levels
+   int numLevels = a_level+1;                                                    // 0 index count of total levels
 
    AMRPoissonOpFactory opFactory;                                                // Create an instance of AMRPoissonOpFactory
 
@@ -661,9 +653,9 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
    Vector<ProblemDomain> domain;
    Vector<int> ref_ratio;
    Vector<Real> dx;
-   int finestLevel;
+   int level;
 
-   setupGrids(amrGrids, amrDomains, refRatios, amrDx, finestLevel);              // but here setupGrids is called to do what? If all of these parameters are defined ...
+   setupGrids(amrGrids, amrDomains, refRatios, amrDx, level);              // but here setupGrids is called to do what? If all of these parameters are defined ...
 
    // initialize solver
    AMRMultiGrid<LevelData<FArrayBox> > *amrSolver;                               // Not a_amrSolver? Where is amrSolver defined? And why a pointer?
@@ -692,7 +684,7 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
    BiCGStabSolver<LevelData<FArrayBox> > bottomSolver;                           // So a v-cycle needs a direct solver on the coarsest level
    bottomSolver.m_verbosity = s_verbosity-2;
    setupSolver(amrSolver, bottomSolver, amrGrids, amrDomains,
-               refRatios, amrDx, finestLevel);
+               refRatios, amrDx, level);
 
 
    // allocate solution and RHS, initialize RHS
@@ -702,7 +694,7 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
    // this is for convenience
    Vector<LevelData<FArrayBox>* > resid(numLevels, NULL);                        // ??? residual calculation
 
-   for (int lev=0; lev<=finestLevel; lev++)                                      // Loop over all AMR levels
+   for (int lev=0; lev<=level; lev++)                                      // Loop over all AMR levels
      {
        const DisjointBoxLayout& levelGrids = amrGrids[lev];                      // lev = level dummy
        phi[lev] = new LevelData<FArrayBox>(levelGrids, 1, IntVect::Unit);        // create space for \phi data for each level
@@ -710,7 +702,7 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
        resid[lev] = new LevelData<FArrayBox>(levelGrids, 1, IntVect::Zero);      // create space for residual for each level
      }
 
-   setRHS(rhs, domain, ref_ratio, dx, finestLevel );                             // set the RHS, wasn't this done in the beginning already?
+   setRHS(rhs, domain, ref_ratio, dx, level );                             // set the RHS, wasn't this done in the beginning already?
                                                                                  // or was that just the rules and parameters and this is the execution?
    // do solve
    int iterations = 1;
@@ -720,7 +712,7 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
      {
        bool zeroInitialGuess = true;
        pout() << "about to go into solve" << endl;
-       amrSolver->solve(phi, rhs, finestLevel, 0, zeroInitialGuess);             // Here is where it is all put together
+       amrSolver->solve(phi, rhs, level, 0, zeroInitialGuess);             // Here is where it is all put together
        pout() << "done solve" << endl;
      }
 
@@ -740,10 +732,10 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
 
    if (writePlots)
      {
-       int numLevels = finestLevel +1;
+       int numLevels = level +1;
        Vector<LevelData<FArrayBox>* > plotData(numLevels, NULL);
 
-       pout() << "Write Plots. norm=" << amrSolver->computeAMRResidual(resid,phi,rhs,finestLevel,0) << endl;
+       pout() << "Write Plots. norm=" << amrSolver->computeAMRResidual(resid,phi,rhs,level,0) << endl;
 
        for (int lev=0; lev<numLevels; lev++)
          {
