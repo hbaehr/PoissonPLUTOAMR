@@ -325,13 +325,13 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
                               incells[3],incells[4],incells[5]) );
 
    RealVect domainSize = RealVect::Unit;                                         // Sets the physical domain of the grid
-   if (ppGrids.contains("domain_size"))
-     {
+//   if (ppGrids.contains("domain_size"))
+//     {
        Vector<Real> insize(SpaceDim);
-       ppGrids.getarr("domain_size", insize, 0, SpaceDim);
+//       ppGrids.getarr("domain_size", insize, 0, SpaceDim);
        domainSize = RealVect(D_DECL6(insize[0],insize[1],insize[2],
                                insize[3],insize[4],insize[5]) );
-     }
+//     }
 
    // resize dataholders                                                         // Why do they need to be resized? For refinement?
    int maxNumLevels = maxLevel +1;
