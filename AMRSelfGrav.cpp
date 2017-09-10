@@ -276,13 +276,7 @@ void setRHS(Vector<LevelData<FArrayBox>* > a_rhs,                               
           for (bit.begin(); bit.ok(); ++bit)
             {
               IntVect iv = bit();                                                // IntVect = vector of integers?, numbers corresponding to grids cells in one direction
-              RealVect loc(iv);                                                  // RealVect = vector of real values?, coordinate location of each cell?
-              loc *= a_dx[lev];
-              loc += ccOffset;
 
-              RealVect dist = loc - center[n];                                   //defining the distance of a location from the center?
-
-              Real val = 0.0;
               thisRhs(iv,0) += a_U(iv,RHO);                                      // This looks right, but I am confused by all the different U containers
             }
          } // end loop over grids on this level
