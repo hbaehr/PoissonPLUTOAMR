@@ -601,14 +601,14 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
                     a_dx[0],                                                     // so setupGrids is probably unnecessary.
                     &ParseBC, alpha, beta);
 
-   AMRLevelOpFactory<LevelData<FArrayBox> >& castFact = (AMRLevelOpFactory<LevelData<FArrayBox> >& ) opFactory;  // ??????????
+   AMRLevelOpFactory<LevelData<FArrayBox> >& castFact = (AMRLevelOpFactory<LevelData<FArrayBox> >& ) opFactory;
 
    a_amrSolver->define(a_domain[0], castFact,                                    // Define
                       &a_bottomSolver, numLevels);
 
    // Multigrid solver parameters
    int numSmooth = 4;
-   int numMG = 1;
+   int numMG = 1;                                                                // Type of multigrid solver: 1=V-cycle, 2=W-cycle, etc.
    int maxIter = 100;
    Real eps = 1.0e-9;
    Real hang = 1.0e-10;
