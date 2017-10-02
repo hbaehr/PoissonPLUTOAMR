@@ -419,7 +419,7 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
                      }
                  }
                Vector<int>  proc(boxes.size());
-               LoadBalance(proc,boxes);
+               LoadBalance(proc,boxes);                                          // This is likely for balancing the workload over multiple processors
                a_grids[ilev] = DisjointBoxLayout(boxes, proc, levDomain);        // What is going on here ...
                a_level++;                                                        // and here?
              }
