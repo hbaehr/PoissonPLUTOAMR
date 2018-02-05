@@ -100,122 +100,45 @@ bool              GlobalBCRS::s_valueParsed= false;
 bool              GlobalBCRS::s_trigParsed= false;
 Real bcVal=0.0;
 
-void ParseValue(Real* pos,                                                       // Looks like this would normally parse a BC value settings from a file
-                int* dir,                                                        // dir = direction? as in dimension 1,2,3?
-                Side::LoHiSide* side,                                            // Which side of the coordinate boundary?
-                Real* a_values)                                                  // This must be the boundary function and it = 0.0
+void ParseValue(Real* pos,
+                int* dir,
+                Side::LoHiSide* side,
+                Real* a_values)
 {
-  //  ParmParse pp;
-  //Real bcVal;
-  //pp.get("bc_value",bcVal);                                                    // I still need to get the bc value from somewhere
   a_values[0]=0.;
 }
 
-void ParseBC(FArrayBox& a_state,                                                 // See documentation for BCfunction. State is the value of Phi within box
-             const Box& a_valid,                                                 // domain of the box (might be a subdomain?) around which the BCs are 'built'
-             const ProblemDomain& a_domain,                                      // This is the coarsest domain
-             Real a_dx,                                                          // without grid data is this just the coarse dx
-             bool a_homogeneous)                                                 // If true, ghost values are computed for a homogenous boundary condition
+void ParseBC(FArrayBox& a_state,
+             const Box& a_valid,
+             const ProblemDomain& a_domain,
+             Real a_dx,
+             bool a_homogeneous)
 {
 
-  if (!a_domain.domainBox().contains(a_state.box()))                             // ! returns the logical negation of expression (if expr=T, !expr=F)
+  if (!a_domain.domainBox().contains(a_state.box()))
     {
-
-      // if (!GlobalBCRS::s_areBCsParsed)
-      //   {
-      //     ParmParse pp;
-      //     pp.getarr("bc_lo", GlobalBCRS::s_bcLo, 0, SpaceDim);
-      //     pp.getarr("bc_hi", GlobalBCRS::s_bcHi, 0, SpaceDim);
-      //     GlobalBCRS::s_areBCsParsed = true;
-      //   }
-
-      Box valid = a_valid;                                                       // subdomain(?) around which the BCs are constructed
-      for (int i=0; i<CH_SPACEDIM; ++i)                                          // CH_SPACEDIM = 2 or 3?
+      Box valid = a_valid;
+      for (int i=0; i<CH_SPACEDIM; ++i)
         {
           // don't do anything if periodic
-          if (!a_domain.isPeriodic(i))                                           // So when not periodic (in i direction) do the following
+          if (!a_domain.isPeriodic(i))
             {
-              Box ghostBoxLo = adjCellBox(valid, i, Side::Lo, 1);                // One ghost cell on either side in each direction? Solver is 1st order so it makes sense
+              Box ghostBoxLo = adjCellBox(valid, i, Side::Lo, 1);
               Box ghostBoxHi = adjCellBox(valid, i, Side::Hi, 1);
-              if (!a_domain.domainBox().contains(ghostBoxLo))                    // If there are no ghost cells on the Lo side?
+              if (!a_domain.domainBox().contains(ghostBoxLo))
                 {
-                  // if (GlobalBCRS::s_bcLo[i] == 1)
-                  //   {
-                  //     if (!GlobalBCRS::s_printedThatLo[i])
-                  //       {
-                  //         if (a_state.nComp() != 1)
-                  //           {
-                  //             MayDay::Error("using scalar bc function for vector");
-                  //           }
-                  //         GlobalBCRS::s_printedThatLo[i] = true;
-                  //         if (s_verbosity>5)pout() << "const neum bcs lo for direction " << i << endl;
-                  //       }
-                  //     NeumBC(a_state,
-                  //            valid,
-                  //            a_dx,
-                  //            a_homogeneous,
-                  //            ParseValue,
-                  //            i,
-                  //            Side::Lo);
-                  //   }
-                  // else if (GlobalBCRS::s_bcLo[i] == 0)
-                  //   {
-                  //     if (!GlobalBCRS::s_printedThatLo[i])
-                  //       {
-                  //         if (a_state.nComp() != 1)
-                  //           {
-                  //             MayDay::Error("using scalar bc function for vector");
-                  //           }
-                  //         GlobalBCRS::s_printedThatLo[i] = true;
-                  //         if (s_verbosity>5)pout() << "const diri bcs lo for direction " << i << endl;
-                  //       }                                                     // ... then apply Dirichlet BCs. But from where does this come?
-                      DiriBC(a_state,                                            // phi values with in box valid
-                             valid,                                              // subdomain box
-                             a_dx,                                               // explanatory
-                             true,                                               // Heh?
-                             ParseValue,                                         // This is just a_value=0.0, right?
-                             i,                                                  // ???
-                             Side::Lo,                                           // Lo boundary
-                             1);                                                 // ???
-                  //   }
-                  // else
-                  //   {
-                  //     MayDay::Error("bogus bc flag lo");
-                  //   }
+                      DiriBC(a_state,
+                             valid,
+                             a_dx,
+                             true,
+                             ParseValue,
+                             i,
+                             Side::Lo,
+                             1);
                 }
 
-              if (!a_domain.domainBox().contains(ghostBoxHi))                    // So if domainBox contains no ghost cells on the Hi end?
+              if (!a_domain.domainBox().contains(ghostBoxHi))
                 {
-                  // if (GlobalBCRS::s_bcHi[i] == 1)
-                  //   {
-                  //     if (!GlobalBCRS::s_printedThatHi[i])
-                  //       {
-                  //         if (a_state.nComp() != 1)
-                  //           {
-                  //             MayDay::Error("using scalar bc function for vector");
-                  //           }
-                  //         GlobalBCRS::s_printedThatHi[i] = true;
-                  //         if (s_verbosity>5)pout() << "const neum bcs hi for direction " << i << endl;
-                  //       }
-                  //     NeumBC(a_state,
-                  //            valid,
-                  //            a_dx,
-                  //            a_homogeneous,
-                  //            ParseValue,
-                  //            i,
-                  //            Side::Hi);
-                  //   }
-                  // else if (GlobalBCRS::s_bcHi[i] == 0)
-                  //   {
-                  //     if (!GlobalBCRS::s_printedThatHi[i])
-                  //       {
-                  //         if (a_state.nComp() != 1)
-                  //           {
-                  //             MayDay::Error("using scalar bc function for vector");
-                  //           }
-                  //         GlobalBCRS::s_printedThatHi[i] = true;
-                  //         if (s_verbosity>5)pout() << "const diri bcs hi for direction " << i << endl;
-                  //       }
                       DiriBC(a_state,
                              valid,
                              a_dx,
@@ -224,35 +147,16 @@ void ParseBC(FArrayBox& a_state,                                                
                              i,
                              Side::Hi,
                              1);
-                  //   }
-                  // else
-                  //   {
-                  //     MayDay::Error("bogus bc flag hi");
-                  //   }
                 }
             } // end if is not periodic in ith direction
         }
     }
 }
 
-/***********************************************************************
-   end BC stuff
-***********************************************************************/
-
-/* Set the right hand side of Poisson equation
-*  \nabla \Phi = 4*\pi*G*\rho
-*
-*  Since everything on the RHS outside of \rho is constant, these are put into
-*  the constant value b. The trick will be getting the right values from the
-*  a_U or m_U arrays
-*
-*
-*/
-
-void setRHS(Vector<LevelData<FArrayBox>* > a_rhs,                                // Output array of \rho: a_U[RHO]?
-            Vector<ProblemDomain>& a_domain,                                     // Grid domain
-            Vector<int>& a_ref_ratio,                                            // Refinement ratios between levels
-            Vector<Real>& a_dx,                                                  // dx: grid spacing
+void setRHS(LevelData<FArrayBox>* a_rhs,                                         // Output array of \rho: a_U[RHO]?
+            ProblemDomain& a_domain,                                             // Grid domain
+            int& a_ref_ratio,                                                    // Refinement ratios between levels
+            Real& a_dx,                                                          // dx: grid spacing
             int a_level)                                                         // number of most refined level = m_level
 {
   CH_TIME("setRHS");
