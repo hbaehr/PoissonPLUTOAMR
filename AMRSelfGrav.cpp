@@ -479,7 +479,7 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
 
 }
 
- void setupSolver(AMRMultiGrid<LevelData<FArrayBox> > *a_amrSolver,              // Name of the solver
+ void setupSolver(AMRMultiGrid<LevelData<FArrayBox> > *a_amrPoissonSolver,              // Name of the solver
              LinearSolver<LevelData<FArrayBox> >& a_bottomSolver,                // The bottom solver is what solves the Poisson equation on the coarsest level
              const Vector<DisjointBoxLayout>& a_grids,                           // Grids for each AMR level (i.e. there are multiple grids per level)
              const Vector<ProblemDomain>& a_domain,                              // Entire domain
@@ -507,7 +507,7 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
 
    AMRLevelOpFactory<LevelData<FArrayBox> >& castFact = (AMRLevelOpFactory<LevelData<FArrayBox> >& ) opFactory;
 
-   a_amrSolver->define(a_domain[0], castFact,                                    // Define
+   a_amrPoissonSolver->define(a_domain[0], castFact,                                    // Define
                       &a_bottomSolver, numLevels);
 
    // Multigrid solver parameters
@@ -518,9 +518,9 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
    Real hang = 1.0e-10;
 
    Real normThresh = 1.0e-30;                                                    // What is this threshold? Look to the a_amrSolver
-   a_amrSolver->setSolverParameters(numSmooth, numSmooth, numSmooth,             // Input all the parameters
+   a_amrPoissonSolver->setSolverParameters(numSmooth, numSmooth, numSmooth,             // Input all the parameters
                                 numMG, maxIter, eps, hang, normThresh);
-   a_amrSolver->m_verbosity = s_verbosity-1;
+   a_amrPoissonSolver->m_verbosity = s_verbosity-1;
 
    // optional parameters
 //   ppSolver.query("num_pre", a_amrSolver->m_pre);
@@ -537,7 +537,7 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
    int s_verbosity = 4;
 
    // initialize solver
-   AMRMultiGrid<LevelData<FArrayBox> > *amrSolver;                               // Not a_amrSolver? Where is amrSolver defined? And why a pointer?
+   AMRMultiGrid<LevelData<FArrayBox> > *amrPoissonSolver;                               // Not a_amrSolver? Where is amrSolver defined? And why a pointer?
    if ( mg_type==0 )
      {
        amrSolver = new AMRMultiGrid<LevelData<FArrayBox> >();                    // This is the solver from one level to another
@@ -562,7 +562,7 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
      }
    BiCGStabSolver<LevelData<FArrayBox> > bottomSolver;                           // So a v-cycle needs a direct solver on the coarsest level
    bottomSolver.m_verbosity = s_verbosity-2;
-   setupSolver(amrSolver, bottomSolver, amrGrids, amrDomains,
+   setupSolver(amrPoissonSolver, bottomSolver, amrGrids, amrDomains,
                refRatios, amrDx, level);
 
 
@@ -590,7 +590,7 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
      {
        bool zeroInitialGuess = true;
        pout() << "about to go into solve" << endl;
-       amrSolver->solve(phi, rhs, level, 0, zeroInitialGuess);           // Here is where it is all put together
+       amrPoissonSolver->solve(phi, rhs, level, 0, zeroInitialGuess);           // Here is where it is all put together
        pout() << "done solve" << endl;
      }
 
@@ -613,7 +613,7 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
        int numLevels = level +1;
        Vector<LevelData<FArrayBox>* > plotData(numLevels, NULL);
 
-       pout() << "Write Plots. norm=" << amrSolver->computeAMRResidual(resid,phi,rhs,level,0) << endl;
+       pout() << "Write Plots. norm=" << amrPoissonSolver->computeAMRResidual(resid,phi,rhs,level,0) << endl;
 
        for (int lev=0; lev<numLevels; lev++)
          {
@@ -668,7 +668,7 @@ void setupGrids(Vector<DisjointBoxLayout>& a_grids,                             
        delete resid[lev];
      }
 
-   delete amrSolver;
+   delete amrPoissonSolver;
 
    return status;
 }
