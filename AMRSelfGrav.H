@@ -53,15 +53,24 @@ using std::ios;
 
 #include "UsingNamespace.H"
 
-#ifdef CH_LINUX
-// Should be undefined by default
-#define TRAP_FPE
-#undef  TRAP_FPE
-#endif
+class AMRPoissonPluto : public AMRPoisson
+{
+public:
+  /// Constructor
+  /**
+  */
+  AMRPoissonPluto();
 
-#ifdef TRAP_FPE
-static void enableFpExceptions();
-#endif
+  /// Destructor
+  /**
+  */
+  virtual ~AMRLevelPluto();
+
+  /// Define the parameters the object needs
+  /**
+  */
+  void defineParams(
+  );
 
 virtual void ParseValue(Real* pos,                                                       // Looks like this would normally parse a BC value settings from a file
                         int* dir,                                                        // dir = direction? as in dimension 1,2,3?
@@ -80,24 +89,12 @@ virtual void setRHS(Vector<LevelData<FArrayBox>* > rhs,                         
                     Vector<Real>& a_dx,                                                  // dx: grid spacing
                     int a_level);                                                        // number of most refined level = m_level
 
-virtual void setupGrids(Vector<DisjointBoxLayout>& a_grids,                              // uncertain whether I will need to setup my own grid, but
-                        Vector<ProblemDomain>& a_domains,                                // this will be good for completeness sake
-                        Vector<int>& a_ref_ratio,                                        // grid parameters are already defined in other areas of
-                        Vector<Real>& a_dx,                                              // PLUTO Chombo and if this setup is just to define the bounds
-                        int& a_level);                                                   // of the box then I already have that. I guess I just need to know
-
 virtual int runSolver();
 
 virtual void setupSolver(AMRMultiGrid<LevelData<FArrayBox> >        *a_amrSolver,           // Name of the Multigrid solver
                          LinearSolver<LevelData<FArrayBox> >&       a_bottomSolver,         // Solver at the bottom of the V-cycle
-                         const Vector<DisjointBoxLayout>&           a_grids,                // Grids for each AMR level
-                         const Vector<ProblemDomain>&               a_domain,               // Entire domain
-                         const Vector<int>&                         a_ref_ratio,            // Refinement ratios between levels
-                         const Vector<Real>&                        a_amrDx,                // grid spacing
-                         int                                        a_finestLevel);         // number of most refined level
-
-virtual void setRHS(Vector<LevelData<FArrayBox>* >                  a_rhs,                  // Output array of \rho
-                    Vector<ProblemDomain>&                          a_domain,               // Grid domain
-                    Vector<int>&                                    m_ref_ratio,            // Refinement ratios between levels
-                    Vector<Real>&                                   a_amrDx,                // grid spacing
-                    int                                             a_finestLevel);         // number of most refined level
+                         Vector<DisjointBoxLayout>&                 a_grids,                // Grids for each AMR level
+                         Vector<ProblemDomain>&                     a_domain,               // Entire domain
+                         Vector<int>&                               a_ref_ratio,            // Refinement ratios between levels
+                         Vector<Real>&                              a_dx,                // grid spacing
+                         int                                        a_level);         // number of most refined level
