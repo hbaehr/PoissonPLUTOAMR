@@ -71,7 +71,34 @@ static void enableFpExceptions();
 *
 *
 *
-*/
+*/// Flag everything as not defined or set
+AMRPoissonPluto::AMRPoissonPluto()
+{
+  m_isDefined = false;
+  m_isBoundarySet = false;
+  m_isRiemannSet = false;
+  m_isCurrentTimeSet = false;
+  m_isCurrentBoxSet = false;
+}
+
+AMRPoissonPluto::~AMRPoissonPluto()
+{
+}
+
+// Define this object and the boundary condition object
+void AMRPoissonPluto::define(ProblemDomain& a_domain,
+                          const Real&    a_dx,
+                          const int&     a_level,
+                          const int&     a_numGhost)
+{
+
+  // Store the domain and grid spacing
+  m_domain = a_domain;
+  m_dx = a_dx;
+  m_level = a_level;
+  m_numGhost = a_numGhost;
+  m_isDefined = true;
+}
 
 int s_verbosity = 1;
 
