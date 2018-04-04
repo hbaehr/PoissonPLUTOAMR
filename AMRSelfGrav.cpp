@@ -55,28 +55,10 @@ using std::ios;
 static void enableFpExceptions();
 #endif
 
-// Other things which need to be addressed:
-// 1) Boundary conditions
-// 2) Fill the ghost zones of m_gravpot or a_gravpot by interpolation? see LevelPluto for more info
-// 3) Go through each input from PLUTO and decide whether they should be  temporary 'm_' or permanent 'a_' for now they are all 'a_'
-
-/*
-* A few notes:
-* m_ indicates a temporary storage structure and should be used within routines
-*    and re-used each timestep
-*
-* a_ indicates the main which stores data between timesteps
-*
-*
-*
-*/// Flag everything as not defined or set
+// Flag everything as not defined or set
 AMRPoissonPluto::AMRPoissonPluto()
 {
   m_isDefined = false;
-  m_isBoundarySet = false;
-  m_isRiemannSet = false;
-  m_isCurrentTimeSet = false;
-  m_isCurrentBoxSet = false;
 }
 
 AMRPoissonPluto::~AMRPoissonPluto()
@@ -101,22 +83,22 @@ void AMRPoissonPluto::define(ProblemDomain& a_domain,
 int s_verbosity = 1;
 
 //  -----------------------------------------
-// boundary condition stuff                                                      // Are these boundary conditions between AMR levels or for the entire domain?
+// boundary condition stuff
 //  -----------------------------------------
 ///
 /**
  */
-class GlobalBCRS                                                                 // Is there any documentation on GlobalBCRS?
+class GlobalBCRS
 {
 public:
-  static std::vector<bool> s_printedThatLo, s_printedThatHi;                     // why bool?
-  static std::vector<int> s_bcLo, s_bcHi;                                        // Lo and Hi refer to what exactly?
+  static std::vector<bool> s_printedThatLo, s_printedThatHi;
+  static std::vector<int> s_bcLo, s_bcHi;
   static RealVect s_trigvec;
   static bool s_areBCsParsed, s_valueParsed, s_trigParsed;
 };
 
-std::vector<bool> GlobalBCRS::s_printedThatLo = std::vector<bool>(SpaceDim, false); // vector<bool> is ???
-std::vector<bool> GlobalBCRS::s_printedThatHi = std::vector<bool>(SpaceDim, false); //
+std::vector<bool> GlobalBCRS::s_printedThatLo = std::vector<bool>(SpaceDim, false);
+std::vector<bool> GlobalBCRS::s_printedThatHi = std::vector<bool>(SpaceDim, false);
 std::vector<int>  GlobalBCRS::s_bcLo = std::vector<int>();
 std::vector<int>  GlobalBCRS::s_bcHi = std::vector<int>();
 RealVect          GlobalBCRS::s_trigvec = RealVect::Zero;
