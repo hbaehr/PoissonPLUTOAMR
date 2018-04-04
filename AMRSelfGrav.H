@@ -51,8 +51,6 @@ using std::ios;
 #include "AMRPoissonOp.H"
 #include "AMRMultiGrid.H"
 
-#include "UsingNamespace.H"
-
 class AMRPoissonPluto
 {
 public:
@@ -100,4 +98,14 @@ public:
                            int                                        a_level);         // number of most refined level
 
   virtual void runSolver();
+
+protected:
+
+  Vector<ProblemDomain> m_domain;
+
+  Vector<int> m_level;
+
+  Vector<Real> m_dx;
+
+  Vector<int> m_ref_ratio;
 };
