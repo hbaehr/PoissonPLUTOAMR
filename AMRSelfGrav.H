@@ -67,10 +67,11 @@ public:
   /// Define the parameters the object needs
   /**
   */
-  virtual void defineParams(ProblemDomain&  a_domain,
-                            Real&           a_dx,
-                            int&            a_level,
-                            int&            a_ref_ratio);
+  virtual void defineParams(ProblemDomain&      a_domain,
+                            DisjointBoxLayout&  a_grids,
+                            Real&               a_dx,
+                            int&                a_level,
+                            int&                a_ref_ratio);
 
   virtual void ParseValue(Real*           pos,
                           int*            dir,
