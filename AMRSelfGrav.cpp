@@ -184,6 +184,10 @@ void AMRPoissonPluto::setRHS(Vector<LevelData<FArrayBox>* > a_rhs,
                              Vector<Real>&                  a_dx,
                              int                            a_level)
 {
+   int maxLevel = 0;
+   maxLevel = atoi(ParamFileGet("Levels",1));
+   int numLevels = MAX(maxLevel, 1)
+
    // Innitialize rhs container for Poisson solver
    a_rhs.resize(maxLevel);
 
