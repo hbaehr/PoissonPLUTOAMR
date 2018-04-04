@@ -45,8 +45,6 @@ using std::ios;
 #include "AMRPoissonOp.H"
 #include "AMRMultiGrid.H"
 
-#include "UsingNamespace.H"
-
 #ifdef CH_LINUX
 // Should be undefined by default
 #define TRAP_FPE
@@ -180,11 +178,11 @@ void AMRPoissonPLuto::ParseBC(FArrayBox& a_state,
     }
 }
 
-void AMRPoissonPluto::setRHS(LevelData<FArrayBox>* a_rhs,                                         // Output array of \rho: a_U[RHO]?
-                             ProblemDomain& a_domain,                                             // Grid domain
-                             int& a_ref_ratio,                                                    // Refinement ratios between levels
-                             Real& a_dx,                                                          // dx: grid spacing
-                             int a_level)                                                         // number of most refined level = m_level
+void AMRPoissonPluto::setRHS(Vector<LevelData<FArrayBox>* > a_rhs,
+                             Vector<ProblemDomain>&         a_domain,
+                             Vector<int>&                   a_ref_ratio,
+                             Vector<Real>&                  a_dx,
+                             int                            a_level)
 {
    // Innitialize rhs container for Poisson solver
    a_rhs.resize(maxLevel);
