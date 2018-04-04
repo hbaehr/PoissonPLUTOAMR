@@ -91,8 +91,6 @@ public:
                       Vector<Real>&                  a_dx,
                       int                            a_level);
 
-  virtual int runSolver();
-
   virtual void setupSolver(AMRMultiGrid<LevelData<FArrayBox> >        *a_amrSolver,           // Name of the Multigrid solver
                            LinearSolver<LevelData<FArrayBox> >&       a_bottomSolver,         // Solver at the bottom of the V-cycle
                            Vector<DisjointBoxLayout>&                 a_grids,                // Grids for each AMR level
@@ -100,3 +98,6 @@ public:
                            Vector<int>&                               a_ref_ratio,            // Refinement ratios between levels
                            Vector<Real>&                              a_dx,                // grid spacing
                            int                                        a_level);         // number of most refined level
+
+  virtual void runSolver();
+};
