@@ -53,7 +53,7 @@ using std::ios;
 
 #include "UsingNamespace.H"
 
-class AMRPoissonPluto : public AMRPoisson
+class AMRPoissonPluto
 {
 public:
   /// Constructor
@@ -64,37 +64,39 @@ public:
   /// Destructor
   /**
   */
-  virtual ~AMRLevelPluto();
+  ~AMRLevelPluto();
 
   /// Define the parameters the object needs
   /**
   */
-  void defineParams(
-  );
+  virtual void defineParams(ProblemDomain&  a_domain,
+                            Real&           a_dx,
+                            int&            a_level,
+                            int&            a_ref_ratio);
 
-virtual void ParseValue(Real* pos,                                                       // Looks like this would normally parse a BC value settings from a file
-                        int* dir,                                                        // dir = direction? as in dimension 1,2,3?
-                        Side::LoHiSide* side,                                            // Which side of the coordinate boundary?
-                        Real* a_values);
+  virtual void ParseValue(Real*           pos,
+                          int*            dir,
+                          Side::LoHiSide* side,
+                          Real*           a_values);
 
-virtual void ParseBC(FArrayBox& a_state,                                                 // See documentation for BCfunction. State is the value of Phi within box
-                     const Box& a_valid,                                                 // domain of the box (might be a subdomain?) around which the BCs are 'built'
-                     const ProblemDomain& a_domain,                                      // This is the coarsest domain
-                     Real a_dx,                                                          // without grid data is this just the coarse dx
-                     bool a_homogeneous);
+  virtual void ParseBC(FArrayBox&           a_state,
+                       const Box&           a_valid,
+                       const ProblemDomain& a_domain,
+                       Real                 a_dx,
+                       bool                 a_homogeneous);
 
-virtual void setRHS(Vector<LevelData<FArrayBox>* > rhs,                                  // Output array of \rho: a_U[RHO]?
-                    Vector<ProblemDomain>& a_domain,                                     // Grid domain
-                    Vector<int>& a_ref_ratio,                                            // Refinement ratios between levels
-                    Vector<Real>& a_dx,                                                  // dx: grid spacing
-                    int a_level);                                                        // number of most refined level = m_level
+  virtual void setRHS(Vector<LevelData<FArrayBox>* > a_rhs,
+                      Vector<ProblemDomain>&         a_domain,
+                      Vector<int>&                   a_ref_ratio,
+                      Vector<Real>&                  a_dx,
+                      int                            a_level);
 
-virtual int runSolver();
+  virtual int runSolver();
 
-virtual void setupSolver(AMRMultiGrid<LevelData<FArrayBox> >        *a_amrSolver,           // Name of the Multigrid solver
-                         LinearSolver<LevelData<FArrayBox> >&       a_bottomSolver,         // Solver at the bottom of the V-cycle
-                         Vector<DisjointBoxLayout>&                 a_grids,                // Grids for each AMR level
-                         Vector<ProblemDomain>&                     a_domain,               // Entire domain
-                         Vector<int>&                               a_ref_ratio,            // Refinement ratios between levels
-                         Vector<Real>&                              a_dx,                // grid spacing
-                         int                                        a_level);         // number of most refined level
+  virtual void setupSolver(AMRMultiGrid<LevelData<FArrayBox> >        *a_amrSolver,           // Name of the Multigrid solver
+                           LinearSolver<LevelData<FArrayBox> >&       a_bottomSolver,         // Solver at the bottom of the V-cycle
+                           Vector<DisjointBoxLayout>&                 a_grids,                // Grids for each AMR level
+                           Vector<ProblemDomain>&                     a_domain,               // Entire domain
+                           Vector<int>&                               a_ref_ratio,            // Refinement ratios between levels
+                           Vector<Real>&                              a_dx,                // grid spacing
+                           int                                        a_level);         // number of most refined level
