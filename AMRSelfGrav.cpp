@@ -192,29 +192,29 @@ void AMRPoissonPluto::setRHS(Vector<LevelData<FArrayBox>* > a_rhs,
    a_dx[a_level] = m_dx;
  }
 
- void AMRLevelPluto::setupSolver(AMRMultiGrid<LevelData<FArrayBox> > *a_amrPoissonSolver,              // Name of the solver
-                                 LinearSolver<LevelData<FArrayBox> >& a_bottomSolver,                // The bottom solver is what solves the Poisson equation on the coarsest level
-                                 Vector<DisjointBoxLayout>& a_grids,                           // Grids for each AMR level (i.e. there are multiple grids per level)
-                                 Vector<ProblemDomain>& a_domain,                              // Entire domain
-                                 Vector<int>& a_ref_ratio,                                     // Refinement ratios between levels
-                                 Vector<Real>& a_dx,                                           // grid spacing
-                                 int a_level)                                                        // number of most refined level
+ void AMRLevelPluto::setupSolver(AMRMultiGrid<LevelData<FArrayBox> > *a_amrPoissonSolver,
+                                 LinearSolver<LevelData<FArrayBox> >& a_bottomSolver,
+                                 Vector<DisjointBoxLayout>&           a_grids,
+                                 Vector<ProblemDomain>&               a_domain,
+                                 Vector<int>&                         a_ref_ratio,
+                                 Vector<Real>&                        a_dx,
+                                 int                                  a_level)
  {
    AMRPoissonOpFactory opFactory;                                                // Create an instance of AMRPoissonOpFactory
 
    // solving poisson problem here
-   Real alpha = 0.0;                                                             // Constants which determine form of the Poisson equation
-   Real beta = 1.0/(4*3.14159265);                                               // \beta will be 1/(4*\pi*G) in cgs or code units? For now, G=1
+   Real alpha = 0.0;
+   Real beta = 1.0/(4*3.14159265);
 
-   opFactory.define(a_domain[0],                                                 // Define the parameters that go into each instance of opFactory
-                    a_grids,                                                     // Defining these parameters is the whole point of setupGrids, but these
-                    a_ref_ratio,                                                 // are already defined by the main part of PLUTO-Chombo
-                    a_dx[0],                                                     // so setupGrids is probably unnecessary.
+   opFactory.define(a_domain[0],
+                    a_grids,
+                    a_ref_ratio,
+                    a_dx[0],
                     &ParseBC, alpha, beta);
 
    AMRLevelOpFactory<LevelData<FArrayBox> >& castFact = (AMRLevelOpFactory<LevelData<FArrayBox> >& ) opFactory;
 
-   a_amrPoissonSolver->define(a_domain[0], castFact,                                    // Define
+   a_amrPoissonSolver->define(a_domain[0], castFact,
                       &a_bottomSolver, numLevels);
 
    // Multigrid solver parameters
@@ -224,14 +224,14 @@ void AMRPoissonPluto::setRHS(Vector<LevelData<FArrayBox>* > a_rhs,
    Real eps = 1.0e-9;
    Real hang = 1.0e-10;
 
-   Real normThresh = 1.0e-30;                                                    // What is this threshold? Look to the a_amrSolver
-   a_amrPoissonSolver->setSolverParameters(numSmooth, numSmooth, numSmooth,             // Input all the parameters
+   Real normThresh = 1.0e-30;                                                    // What is this threshold? Look to the a_amrPoissonSolver
+   a_amrPoissonSolver->setSolverParameters(numSmooth, numSmooth, numSmooth,
                                 numMG, maxIter, eps, hang, normThresh);
  }
 
- int runSolver()                                                                 // Now that everything is set up calculate the potential
+ int runSolver()
  {
-   int status = 0, mg_type = 0;                                                  // ???
+   int status = 0, mg_type = 0;
 
    //int s_verbosity = 4;
 
@@ -242,58 +242,50 @@ void AMRPoissonPluto::setRHS(Vector<LevelData<FArrayBox>* > a_rhs,
    int level;
 
    // allocate solution and RHS, initialize RHS
-   int numLevels = grids.size();                                                 // Set up containers
-   Vector<LevelData<FArrayBox>* > phi(numLevels, NULL);                          // \phi container
-   Vector<LevelData<FArrayBox>* > rhs(numLevels, NULL);                          // \rho container
+   int numLevels = grids.size();
+   Vector<LevelData<FArrayBox>* > phi(numLevels, NULL);
+   Vector<LevelData<FArrayBox>* > rhs(numLevels, NULL);
    // this is for convenience
-   Vector<LevelData<FArrayBox>* > resid(numLevels, NULL);                        // residual container
+   Vector<LevelData<FArrayBox>* > resid(numLevels, NULL);
 
-   for (int lev=0; lev<=maxLevel; lev++)                                            // Not sure how to loop over the AMR levels when PLUTO doesn't, maybe a different container?
+   for (int lev=0; lev<=maxLevel; lev++)
      {
-       const DisjointBoxLayout& levelGrids = grids[lev];                         // lev = level dummy
-       phi[lev] = new LevelData<FArrayBox>(levelGrids, 1, IntVect::Unit);        // create space for \phi data for each level
-       rhs[lev] = new LevelData<FArrayBox>(levelGrids, 1, IntVect::Zero);        // create space for \rho date for each level
-       resid[lev] = new LevelData<FArrayBox>(levelGrids, 1, IntVect::Zero);      // create space for residual for each level
+       const DisjointBoxLayout& levelGrids = grids[lev];
+       phi[lev] = new LevelData<FArrayBox>(levelGrids, 1, IntVect::Unit);
+       rhs[lev] = new LevelData<FArrayBox>(levelGrids, 1, IntVect::Zero);
+       resid[lev] = new LevelData<FArrayBox>(levelGrids, 1, IntVect::Zero);
      }
 
    setRHS(rhs, domain, ref_ratio, dx, level);                                   // set the RHS, wasn't this done in the beginning already?
 
    // initialize solver
-   AMRMultiGrid<LevelData<FArrayBox> > *amrPoissonSolver;                               // Not a_amrSolver? Where is amrSolver defined? And why a pointer?
+   AMRMultiGrid<LevelData<FArrayBox> > *amrPoissonSolver;
    if ( mg_type==0 )
      {
-       amrSolver = new AMRMultiGrid<LevelData<FArrayBox> >();                    // This is the solver from one level to another
+       amrSolver = new AMRMultiGrid<LevelData<FArrayBox> >();
      }
    else
      {
        MayDay::Error("FAS not supported");
      }
 
-   BiCGStabSolver<LevelData<FArrayBox> > bottomSolver;                           // So a v-cycle needs a direct solver on the coarsest level
+   BiCGStabSolver<LevelData<FArrayBox> > bottomSolver;
    //bottomSolver.m_verbosity = s_verbosity-2;
    setupSolver(amrPoissonSolver, bottomSolver, amrGrids, amrDomains,
                refRatios, amrDx, level);
-                                                                                 // or was that just the rules and parameters and this is the execution?
+
    // do solve
    int iterations = 1;
 
-   for (int iiter = 0; iiter < iterations; iiter++)                              // interate over
+   for (int iiter = 0; iiter < iterations; iiter++)
      {
        bool zeroInitialGuess = true;
        pout() << "about to go into solve" << endl;
-       amrPoissonSolver->solve(phi, rhs, level, 0, zeroInitialGuess);           // Here is where it is all put together
+       amrPoissonSolver->solve(phi, rhs, level, 0, zeroInitialGuess);
        pout() << "done solve" << endl;
      }
 
    // write results to file
-
-/*
-*  This may be useful for testing an debugging purposes, but in the end,
-*  I would prefer to keep all the information in one place with the rest of
-*  the conserved/primative variables of PLUTO
-*
-*/
-
    bool writePlots = false;
 //   ppMain.query("writePlotFiles", writePlots);
 
