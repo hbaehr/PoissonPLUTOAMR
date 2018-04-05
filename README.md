@@ -10,6 +10,7 @@ When it is all finished there will be instructions here on how to include this w
 
 Instructions:
 -The files AMRPoissonPluto.cpp and AMRPoissonPluto.H go in $PLUTO_DIR/Src/Chombo
+
 -In the template makefile $PLUTO_DIR/Src/Templates/makefile add
   INCLUDE_DIRS += -I$(CHOMBO_HOME)/src/AMRElliptic
 
