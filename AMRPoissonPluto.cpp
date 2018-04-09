@@ -55,25 +55,6 @@ using std::ios;
 static void enableFpExceptions();
 #endif
 
-class GlobalBCRS
-{
-public:
-  static std::vector<bool> s_printedThatLo, s_printedThatHi;
-  static std::vector<int> s_bcLo, s_bcHi;
-  static RealVect s_trigvec;
-  static bool s_areBCsParsed, s_valueParsed, s_trigParsed;
-};
-
-std::vector<bool> GlobalBCRS::s_printedThatLo = std::vector<bool>(SpaceDim, false);
-std::vector<bool> GlobalBCRS::s_printedThatHi = std::vector<bool>(SpaceDim, false);
-std::vector<int>  GlobalBCRS::s_bcLo = std::vector<int>();
-std::vector<int>  GlobalBCRS::s_bcHi = std::vector<int>();
-RealVect          GlobalBCRS::s_trigvec = RealVect::Zero;
-bool              GlobalBCRS::s_areBCsParsed= false;
-bool              GlobalBCRS::s_valueParsed= false;
-bool              GlobalBCRS::s_trigParsed= false;
-Real bcVal=0.0;
-
 // Flag everything as not defined or set
 AMRPoissonPluto::AMRPoissonPluto()
 {
