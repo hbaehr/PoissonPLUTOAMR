@@ -90,13 +90,13 @@ public:
                       Vector<Real>&                  a_dx,
                       int                            a_level);
 
-  virtual void setupSolver(AMRMultiGrid<LevelData<FArrayBox> >        *a_amrSolver,           // Name of the Multigrid solver
-                           LinearSolver<LevelData<FArrayBox> >&       a_bottomSolver,         // Solver at the bottom of the V-cycle
-                           Vector<DisjointBoxLayout>&                 a_grids,                // Grids for each AMR level
-                           Vector<ProblemDomain>&                     a_domain,               // Entire domain
-                           Vector<int>&                               a_ref_ratio,            // Refinement ratios between levels
-                           Vector<Real>&                              a_dx,                // grid spacing
-                           int                                        a_level);         // number of most refined level
+  virtual void setupSolver(AMRMultiGrid<LevelData<FArrayBox> >       *a_amrSolver,
+                           LinearSolver<LevelData<FArrayBox> >&       a_bottomSolver,
+                           Vector<DisjointBoxLayout>&                 a_grids,
+                           Vector<ProblemDomain>&                     a_domain,
+                           Vector<int>&                               a_ref_ratio,
+                           Vector<Real>&                              a_dx,
+                           int                                        a_level);
 
   virtual void runSolver();
 
@@ -109,4 +109,8 @@ protected:
   Vector<Real> m_dx;
 
   Vector<int> m_ref_ratio;
+
+  Vector<DisjointBoxLayout> m_grids;
+
+  Vector<LevelData<FArrayBox> > m_UOld;
 };
