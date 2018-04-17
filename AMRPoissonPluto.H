@@ -51,7 +51,7 @@ using std::ios;
 #include "AMRPoissonOp.H"
 #include "AMRMultiGrid.H"
 
-class AMRPoissonPluto
+class AMRPoissonPluto// subclass to AMRPoissonOp or AMRLevelPluto?
 {
 public:
   /// Constructor
@@ -68,7 +68,6 @@ public:
   /**
   */
   virtual void defineParams(ProblemDomain&      a_domain,
-                            DisjointBoxLayout&  a_grids,
                             Real&               a_dx,
                             int&                a_level,
                             int&                a_ref_ratio);
