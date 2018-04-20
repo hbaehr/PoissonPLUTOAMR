@@ -204,7 +204,7 @@ void AMRPoissonPluto::setRHS(Vector<LevelData<FArrayBox>* > a_rhs,
    Real eps = 1.0e-9;
    Real hang = 1.0e-10;
 
-   Real normThresh = 1.0e-30;                                                    // What is this threshold? Look to the a_amrPoissonSolver
+   Real normThresh = 1.0e-30;                                                    // What is this threshold? Look to AMRMultiGrid
    a_amrPoissonSolver->setSolverParameters(numSmooth, numSmooth, numSmooth,
                                 numMG, maxIter, eps, hang, normThresh);
  }
@@ -236,8 +236,6 @@ void AMRPoissonPluto::setRHS(Vector<LevelData<FArrayBox>* > a_rhs,
        resid[lev] = new LevelData<FArrayBox>(levelGrids, 1, IntVect::Zero);
      }
 
-   setRHS(rhs, domain, ref_ratio, dx, level);                                   // set the RHS, wasn't this done in the beginning already?
-
    // initialize solver
    AMRMultiGrid<LevelData<FArrayBox> > *amrPoissonSolver;
    if ( mg_type==0 )
@@ -251,8 +249,10 @@ void AMRPoissonPluto::setRHS(Vector<LevelData<FArrayBox>* > a_rhs,
 
    BiCGStabSolver<LevelData<FArrayBox> > bottomSolver;
    //bottomSolver.m_verbosity = s_verbosity-2;
-   setupSolver(amrPoissonSolver, bottomSolver, amrGrids, amrDomains,
-               refRatios, amrDx, level);
+   setupSolver(amrPoissonSolver, bottomSolver, grids, domain,
+               ref_ratio, dx, level);
+
+   setRHS(rhs, domain, ref_ratio, dx, level);
 
    // do solve
    int iterations = 1;
