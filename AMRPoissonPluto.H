@@ -62,7 +62,7 @@ public:
   /// Destructor
   /**
   */
-  ~AMRLevelPluto();
+  ~AMRPoissonPluto();
 
   /// Define the parameters the object needs
   /**
