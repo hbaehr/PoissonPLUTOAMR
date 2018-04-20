@@ -240,7 +240,7 @@ void AMRPoissonPluto::setRHS(Vector<LevelData<FArrayBox>* > a_rhs,
    AMRMultiGrid<LevelData<FArrayBox> > *amrPoissonSolver;
    if ( mg_type==0 )
      {
-       amrSolver = new AMRMultiGrid<LevelData<FArrayBox> >();
+       amrPoissonSolver = new AMRMultiGrid<LevelData<FArrayBox> >();
      }
    else
      {
