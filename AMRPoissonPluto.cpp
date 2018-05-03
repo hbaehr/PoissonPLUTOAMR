@@ -66,10 +66,10 @@ AMRPoissonPluto::~AMRPoissonPluto()
 }
 
 // Define this object and the boundary condition object
-void AMRPoissonPluto::defineParams(ProblemDomain&      a_domain,
-                                   Real&               a_dx,
-                                   int                 a_level,
-                                   int&                a_ref_ratio)
+void AMRPoissonPluto::define(ProblemDomain&      a_domain,
+                             Real&               a_dx,
+                             int                 a_level,
+                             int&                a_ref_ratio)
 {
 
   // Store the domain and grid spacing
