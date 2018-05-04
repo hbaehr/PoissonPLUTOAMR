@@ -209,7 +209,7 @@ void AMRPoissonPluto::setRHS(Vector<LevelData<FArrayBox>* > a_rhs,
                                 numMG, maxIter, eps, hang, normThresh);
  }
 
- int runSolver()
+ int AMRPoissonPluto::runSolver()
  {
    int status = 0, mg_type = 0;
 
