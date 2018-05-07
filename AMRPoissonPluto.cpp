@@ -96,6 +96,7 @@ void AMRPoissonPluto::ParseValue(Real* pos,
 {
   a_values[0]=0.;
 }
+//BCValueHolder ParseValue;
 
 void AMRPoissonPLuto::ParseBC(FArrayBox& a_state,
                               const Box& a_valid,
@@ -141,6 +142,7 @@ void AMRPoissonPLuto::ParseBC(FArrayBox& a_state,
         }
     }
 }
+//BCHOlder ParseBC;
 
 void AMRPoissonPluto::setRHS(Vector<LevelData<FArrayBox>* > a_rhs,
                              Vector<ProblemDomain>&         a_domain,
