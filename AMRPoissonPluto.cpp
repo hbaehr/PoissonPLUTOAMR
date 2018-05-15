@@ -251,7 +251,7 @@ void AMRPoissonPluto::setRHS(Vector<LevelData<FArrayBox>* > a_rhs,
 
    BiCGStabSolver<LevelData<FArrayBox> > bottomSolver;
    //bottomSolver.m_verbosity = s_verbosity-2;
-   setupSolver(amrPoissonSolver, bottomSolver, grids, domain,
+   AMRPoissonPluto::setupSolver(amrPoissonSolver, bottomSolver, grids, domain,
                ref_ratio, dx, level);
 
    setRHS(rhs, domain, ref_ratio, dx, level);
