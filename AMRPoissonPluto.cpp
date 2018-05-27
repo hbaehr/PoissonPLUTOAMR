@@ -66,10 +66,12 @@ AMRPoissonPluto::~AMRPoissonPluto()
 }
 
 // Define this object and the boundary condition object
-void AMRPoissonPluto::define(ProblemDomain&      a_domain,
-                             Real&               a_dx,
-                             int                 a_level,
-                             int&                a_ref_ratio)
+void AMRPoissonPluto::define(Vector<LevelData<FArrayData> >&  a_rhs,
+                             Vector<DisjointBoxLayout>&       a_allGrids,
+                             Vector<ProblemDomain>&           a_domain,
+                             Vector<Real>&                    a_dx,
+                             Vector<int>&                     a_ref_ratio,
+                             int                              a_numLevels)
 {
 
   // Store the domain and grid spacing
