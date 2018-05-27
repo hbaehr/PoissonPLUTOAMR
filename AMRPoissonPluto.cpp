@@ -146,36 +146,6 @@ void AMRPoissonPLuto::ParseBC(FArrayBox& a_state,
 }
 //BCHOlder ParseBC;
 
-void AMRPoissonPluto::setRHS(Vector<LevelData<FArrayBox>* > a_rhs,
-                             Vector<ProblemDomain>&         a_domain,
-                             Vector<int>&                   a_ref_ratio,
-                             Vector<Real>&                  a_dx,
-                             int                            a_level)
-{
-   int maxLevel = 0;
-   maxLevel = atoi(ParamFileGet("Levels",1));
-   int numLevels = MAX(maxLevel, 1)
-
-   // Innitialize rhs container for Poisson solver
-   a_rhs.resize(maxLevel);
-
-   // Setup variable for the conserved variable rho to copy it into the new structure
-   Interval rhsInterval(0,0);
-   m_UOld.copyTo(rhsInterval,*a_rhs[a_level],rhsInterval);
-
-   // Resize Vector<> containers for Poisson rhs
-   a_grids.resize(maxLevel);
-   a_domain.resize(maxLevel);
-   a_ref_ratio.resize(maxLevel);
-   a_dx.resize(maxLevel);
-
-   // Put values for current level in proper container for the solver
-   a_grids[a_level] = m_grids;
-   a_domain[a_level] = m_problem_domain;
-   a_ref_ratio[a_level] = m_ref_ratio;
-   a_dx[a_level] = m_dx;
- }
-
  void AMRLevelPluto::setupSolver(AMRMultiGrid<LevelData<FArrayBox> > *a_amrPoissonSolver,
                                  LinearSolver<LevelData<FArrayBox> >& a_bottomSolver,
                                  Vector<DisjointBoxLayout>&           a_grids,
