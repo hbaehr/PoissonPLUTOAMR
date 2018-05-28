@@ -156,7 +156,7 @@ void AMRPoissonPLuto::ParseBC(FArrayBox& a_state,
                                  Vector<Real>&                        a_dx,
                                  int                                  a_level)
  {
-   AMRPoissonOpFactory opFactory;                                                // Create an instance of AMRPoissonOpFactory
+   AMRPoissonOpFactory opFactory;
 
    // solving poisson problem here
    Real alpha = 0.0;
@@ -180,7 +180,7 @@ void AMRPoissonPLuto::ParseBC(FArrayBox& a_state,
    Real eps = 1.0e-9;
    Real hang = 1.0e-10;
 
-   Real normThresh = 1.0e-30;                                                    // What is this threshold? Look to AMRMultiGrid
+   Real normThresh = 1.0e-30;
    a_amrPoissonSolver->setSolverParameters(numSmooth, numSmooth, numSmooth,
                                 numMG, maxIter, eps, hang, normThresh);
  }
