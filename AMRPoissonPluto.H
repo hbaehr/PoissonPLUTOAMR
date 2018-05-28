@@ -67,7 +67,7 @@ public:
   /// Define the parameters the object needs
   /**
   */
-  virtual void define(Vector<LevelData<FArrayBox> >&    a_rhs,
+  virtual void define(Vector<LevelData<FArrayBox>* >    a_rhs,
                       Vector<DisjointBoxLayout>&        a_allGrids,
                       Vector<ProblemDomain>&            a_domain,
                       Vector<Real>&                     a_dx,

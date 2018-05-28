@@ -66,7 +66,7 @@ AMRPoissonPluto::~AMRPoissonPluto()
 }
 
 // Define this object and the boundary condition object
-void AMRPoissonPluto::define(Vector<LevelData<FArrayData> >&  a_rhs,
+void AMRPoissonPluto::define(Vector<LevelData<FArrayData>* >  a_rhs,
                              Vector<DisjointBoxLayout>&       a_allGrids,
                              Vector<ProblemDomain>&           a_domain,
                              Vector<Real>&                    a_dx,
