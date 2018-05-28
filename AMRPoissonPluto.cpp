@@ -74,10 +74,12 @@ void AMRPoissonPluto::define(Vector<LevelData<FArrayData> >&  a_rhs,
                              int                              a_numLevels)
 {
 
-  // Store the domain and grid spacing
+  // Store the level data to be used later
+  m_rhs = a_rhs;
+  m_allGrids = a_allGrids;
   m_domain = a_domain;
   m_dx = a_dx;
-  m_level = a_level;
+  m_numLevels = a_numLevels;
   m_ref_ratio = a_ref_ratio;
   m_isDefined = true;
 }
@@ -189,12 +191,6 @@ void AMRPoissonPLuto::ParseBC(FArrayBox& a_state,
 
    //int s_verbosity = 4;
 
-   Vector<DisjointBoxLayout> grids;
-   Vector<ProblemDomain> domain;
-   Vector<int> ref_ratio;
-   Vector<Real> dx;
-   int level;
-
    // allocate solution and RHS, initialize RHS
    int numLevels = grids.size();
    Vector<LevelData<FArrayBox>* > phi(numLevels, NULL);
@@ -223,10 +219,10 @@ void AMRPoissonPLuto::ParseBC(FArrayBox& a_state,
 
    BiCGStabSolver<LevelData<FArrayBox> > bottomSolver;
    //bottomSolver.m_verbosity = s_verbosity-2;
-   AMRPoissonPluto::setupSolver(amrPoissonSolver, bottomSolver, grids, domain,
-               ref_ratio, dx, level);
+   AMRPoissonPluto::setupSolver(amrPoissonSolver, bottomSolver, m_allGrids, m_domain,
+               m_ref_ratio, m_dx, m_numLevels);
 
-   setRHS(rhs, domain, ref_ratio, dx, level);
+   //setRHS(rhs, domain, ref_ratio, dx, level);
 
    // do solve
    int iterations = 1;

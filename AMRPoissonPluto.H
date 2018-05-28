@@ -67,10 +67,12 @@ public:
   /// Define the parameters the object needs
   /**
   */
-  virtual void define(ProblemDomain&      a_domain,
-                      Real&               a_dx,
-                      int&                a_level,
-                      int&                a_ref_ratio);
+  virtual void define(Vector<LevelData<FArrayBox> >&    a_rhs,
+                      Vector<DisjointBoxLayout>&        a_allGrids,
+                      Vector<ProblemDomain>&            a_domain,
+                      Vector<Real>&                     a_dx,
+                      Vector<int>&                      a_ref_ratio
+                      int                               a_numLevels);
 
   virtual void ParseValue(Real*           pos,
                           int*            dir,
@@ -83,11 +85,11 @@ public:
                        Real                 a_dx,
                        bool                 a_homogeneous);
 
-  virtual void setRHS(Vector<LevelData<FArrayBox>* > a_rhs,
+/*  virtual void setRHS(Vector<LevelData<FArrayBox>* > a_rhs,
                       Vector<ProblemDomain>&         a_domain,
                       Vector<int>&                   a_ref_ratio,
                       Vector<Real>&                  a_dx,
-                      int                            a_level);
+                      int                            a_level);*/
 
   virtual void setupSolver(AMRMultiGrid<LevelData<FArrayBox> >       *a_amrSolver,
                            LinearSolver<LevelData<FArrayBox> >&       a_bottomSolver,
@@ -101,15 +103,15 @@ public:
 
 protected:
 
-  Vector<ProblemDomain> m_domain;
+  Vector<ProblemDomain>& m_domain;
 
-  Vector<int> m_level;
+  int m_numLevels;
 
-  Vector<Real> m_dx;
+  Vector<Real>& m_dx;
 
-  Vector<int> m_ref_ratio;
+  Vector<int>& m_ref_ratio;
 
-  Vector<DisjointBoxLayout> m_grids;
+  Vector<DisjointBoxLayout>& m_allGrids;
 
-  Vector<LevelData<FArrayBox> > m_UOld;
+  Vector<LevelData<FArrayBox> >& m_rhs;
 };
