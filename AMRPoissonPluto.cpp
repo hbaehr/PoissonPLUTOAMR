@@ -162,6 +162,11 @@ void AMRPoissonPLuto::ParseBC(FArrayBox& a_state,
    Real alpha = 0.0;
    Real beta = 1.0/(4*3.14159265);
 
+   // cast ParseBC to BCHolder???
+   //ParseBC<>
+
+   //register_enum< shader::FUNC >( L, "functions", (const char *(*)( shader::FUNC ))shader::to_cstring );
+
    opFactory.define(a_domain[0],
                     a_grids,
                     a_ref_ratio,
