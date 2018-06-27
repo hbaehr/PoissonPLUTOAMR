@@ -199,7 +199,7 @@ void AMRPoissonPLuto::ParseBC(FArrayBox& a_state,
    // allocate solution and RHS, initialize RHS
    int numLevels = grids.size();
    Vector<LevelData<FArrayBox>* > phi(numLevels, NULL);
-   Vector<LevelData<FArrayBox>* > rhs(numLevels, NULL);
+   //Vector<LevelData<FArrayBox>* > rhs(numLevels, NULL);
    // this is for convenience
    Vector<LevelData<FArrayBox>* > resid(numLevels, NULL);
 
@@ -207,7 +207,7 @@ void AMRPoissonPLuto::ParseBC(FArrayBox& a_state,
      {
        const DisjointBoxLayout& levelGrids = grids[lev];
        phi[lev] = new LevelData<FArrayBox>(levelGrids, 1, IntVect::Unit);
-       rhs[lev] = new LevelData<FArrayBox>(levelGrids, 1, IntVect::Zero);
+       //rhs[lev] = new LevelData<FArrayBox>(levelGrids, 1, IntVect::Zero);
        resid[lev] = new LevelData<FArrayBox>(levelGrids, 1, IntVect::Zero);
      }
 
