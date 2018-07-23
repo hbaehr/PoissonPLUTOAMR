@@ -93,20 +93,20 @@ int s_verbosity = 1;
 /**
  */
 
-void AMRPoissonPluto::ParseValue(Real* pos,
-                                 int* dir,
-                                 Side::LoHiSide* side,
-                                 Real* a_values)
+void ParseValue(Real* pos,
+                int* dir,
+                Side::LoHiSide* side,
+                Real* a_values)
 {
   a_values[0]=0.;
 }
 //BCValueHolder ParseValue;
 
-void AMRPoissonPLuto::ParseBC(FArrayBox& a_state,
-                              const Box& a_valid,
-                              const ProblemDomain& a_domain,
-                              Real a_dx,
-                              bool a_homogeneous)
+void ParseBC(FArrayBox& a_state,
+             const Box& a_valid,
+             const ProblemDomain& a_domain,
+             Real a_dx,
+             bool a_homogeneous)
 {
 
   if (!a_domain.domainBox().contains(a_state.box()))
@@ -146,7 +146,7 @@ void AMRPoissonPLuto::ParseBC(FArrayBox& a_state,
         }
     }
 }
-//BCHOlder ParseBC;
+//BCHolder ParseBC;
 
  void AMRLevelPluto::setupSolver(AMRMultiGrid<LevelData<FArrayBox> > *a_amrPoissonSolver,
                                  LinearSolver<LevelData<FArrayBox> >& a_bottomSolver,
