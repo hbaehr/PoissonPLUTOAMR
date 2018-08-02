@@ -66,22 +66,20 @@ AMRPoissonPluto::~AMRPoissonPluto()
 }
 
 // Define this object and the boundary condition object
-void AMRPoissonPluto::define(Vector<LevelData<FArrayData>* >  a_rhs,
-                             Vector<DisjointBoxLayout>&       a_allGrids,
-                             Vector<ProblemDomain>&           a_domain,
+void AMRPoissonPluto::define(Vector<ProblemDomain>&           a_domain,
                              Vector<Real>&                    a_dx,
                              Vector<int>&                     a_ref_ratio,
                              int                              a_numLevels)
 {
 
   // Store the level data to be used later
-  m_rhs = a_rhs;
-  m_allGrids = a_allGrids;
   m_domain = a_domain;
   m_dx = a_dx;
   m_numLevels = a_numLevels;
   m_ref_ratio = a_ref_ratio;
   m_isDefined = true;
+//  AMRMultiGrid<LevelData<FArrayBox> > *amrSolver;
+//  BiCGStabSolver<LevelData<FArrayBox> > bottomSolver;
 }
 
 int s_verbosity = 1;
@@ -100,7 +98,6 @@ void ParseValue(Real* pos,
 {
   a_values[0]=0.;
 }
-//BCValueHolder ParseValue;
 
 void ParseBC(FArrayBox& a_state,
              const Box& a_valid,
@@ -146,7 +143,6 @@ void ParseBC(FArrayBox& a_state,
         }
     }
 }
-//BCHolder ParseBC;
 
  void AMRLevelPluto::setupSolver(AMRMultiGrid<LevelData<FArrayBox> > *a_amrPoissonSolver,
                                  LinearSolver<LevelData<FArrayBox> >& a_bottomSolver,
@@ -161,11 +157,6 @@ void ParseBC(FArrayBox& a_state,
    // solving poisson problem here
    Real alpha = 0.0;
    Real beta = 1.0/(4*3.14159265);
-
-   // cast ParseBC to BCHolder???
-   //ParseBC<>
-
-   //register_enum< shader::FUNC >( L, "functions", (const char *(*)( shader::FUNC ))shader::to_cstring );
 
    opFactory.define(a_domain[0],
                     a_grids,
@@ -224,10 +215,8 @@ void ParseBC(FArrayBox& a_state,
 
    BiCGStabSolver<LevelData<FArrayBox> > bottomSolver;
    //bottomSolver.m_verbosity = s_verbosity-2;
-   AMRPoissonPluto::setupSolver(amrPoissonSolver, bottomSolver, m_allGrids, m_domain,
-               m_ref_ratio, m_dx, m_numLevels);
-
-   //setRHS(rhs, domain, ref_ratio, dx, level);
+   //AMRPoissonPluto::setupSolver(amrPoissonSolver, bottomSolver, m_allGrids, m_domain,
+               //m_ref_ratio, m_dx, m_numLevels);
 
    // do solve
    int iterations = 1;

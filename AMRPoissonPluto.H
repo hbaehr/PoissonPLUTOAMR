@@ -74,17 +74,6 @@ public:
                       Vector<int>&                      a_ref_ratio
                       int                               a_numLevels);
 
-  virtual void ParseValue(Real*           pos,
-                          int*            dir,
-                          Side::LoHiSide* side,
-                          Real*           a_values);
-
-  virtual void ParseBC(FArrayBox&           a_state,
-                       const Box&           a_valid,
-                       const ProblemDomain& a_domain,
-                       Real                 a_dx,
-                       bool                 a_homogeneous);
-
 /*  virtual void setRHS(Vector<LevelData<FArrayBox>* > a_rhs,
                       Vector<ProblemDomain>&         a_domain,
                       Vector<int>&                   a_ref_ratio,
