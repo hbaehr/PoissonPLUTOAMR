@@ -66,15 +66,19 @@ AMRPoissonPluto::~AMRPoissonPluto()
 }
 
 // Define this object and the boundary condition object
-void AMRPoissonPluto::define(Vector<ProblemDomain>&           a_domain,
-                             Vector<Real>&                    a_dx,
-                             Vector<int>&                     a_ref_ratio,
+void AMRPoissonPluto::define(Vector<LevelData<FArrayBox>* >   a_rhs,
+                             Vector<DisjointBoxLayout>        a_allGrids,
+                             Vector<ProblemDomain>            a_domain,
+                             Vector<Real>                     a_dx,
+                             Vector<int>                      a_ref_ratio,
                              int                              a_numLevels)
 {
 
   // Store the level data to be used later
-  m_domain = a_domain;
-  m_dx = a_dx;
+  m_rhs       = a_rhs;
+  m_allGrids  = a_allGrids;
+  m_domain    = a_domain;
+  m_dx        = a_dx;
   m_numLevels = a_numLevels;
   m_ref_ratio = a_ref_ratio;
   m_isDefined = true;
@@ -196,7 +200,7 @@ void ParseBC(FArrayBox& a_state,
 
    for (int lev=0; lev<=maxLevel; lev++)
      {
-       const DisjointBoxLayout& levelGrids = grids[lev];
+       const DisjointBoxLayout& levelGrids = m_allGrids[lev];
        phi[lev] = new LevelData<FArrayBox>(levelGrids, 1, IntVect::Unit);
        //rhs[lev] = new LevelData<FArrayBox>(levelGrids, 1, IntVect::Zero);
        resid[lev] = new LevelData<FArrayBox>(levelGrids, 1, IntVect::Zero);
@@ -215,8 +219,8 @@ void ParseBC(FArrayBox& a_state,
 
    BiCGStabSolver<LevelData<FArrayBox> > bottomSolver;
    //bottomSolver.m_verbosity = s_verbosity-2;
-   //AMRPoissonPluto::setupSolver(amrPoissonSolver, bottomSolver, m_allGrids, m_domain,
-               //m_ref_ratio, m_dx, m_numLevels);
+   setupSolver(amrPoissonSolver, bottomSolver, m_allGrids, m_domain,
+               m_ref_ratio, m_dx, m_numLevels);
 
    // do solve
    int iterations = 1;
@@ -225,7 +229,7 @@ void ParseBC(FArrayBox& a_state,
      {
        bool zeroInitialGuess = true;
        pout() << "about to go into solve" << endl;
-       amrPoissonSolver->solve(phi, rhs, level, 0, zeroInitialGuess);
+       amrPoissonSolver->solve(phi, m_rhs, numLevels, 0, zeroInitialGuess);
        pout() << "done solve" << endl;
      }
 
@@ -237,7 +241,7 @@ void ParseBC(FArrayBox& a_state,
 
    if (writePlots)
      {
-       int numLevels = level +1;
+       int numLevels = m_allGrids.size();
        Vector<LevelData<FArrayBox>* > plotData(numLevels, NULL);
 
        pout() << "Write Plots. norm=" << amrPoissonSolver->computeAMRResidual(resid,phi,rhs,level,0) << endl;
@@ -250,7 +254,7 @@ void ParseBC(FArrayBox& a_state,
            Interval phiInterval(0,0);
            phi[lev]->copyTo(phiInterval, *plotData[lev], phiInterval);
            Interval rhsInterval(1,1);
-           rhs[lev]->copyTo(phiInterval, *plotData[lev], rhsInterval);
+           m_rhs[lev]->copyTo(phiInterval, *plotData[lev], rhsInterval);
            Interval resInterval(2,2);
            resid[lev]->copyTo(phiInterval, *plotData[lev], resInterval);
          }
@@ -269,14 +273,14 @@ void ParseBC(FArrayBox& a_state,
        Real bogusVal = 1.0;
 
        WriteAMRHierarchyHDF5(fname,
-                             amrGrids,
+                             m_allGrids,
                              plotData,
                              varNames,
-                             amrDomains[0].domainBox(),
-                             amrDx[0],
+                             m_domain[0].domainBox(),
+                             m_dx[0],
                              bogusVal,
                              bogusVal,
-                             refRatios,
+                             m_ref_ratio,
                              numLevels);
 
        // clean up
@@ -291,7 +295,7 @@ void ParseBC(FArrayBox& a_state,
    for (int lev=0; lev<phi.size(); lev++)
      {
        delete phi[lev];
-       delete rhs[lev];
+       delete m_rhs[lev];
        delete resid[lev];
      }
 

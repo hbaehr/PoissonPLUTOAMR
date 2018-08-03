@@ -1,9 +1,3 @@
-/*
- *   Header file for speeding up compilation
- *   This header is only necessary if AMRSelfgrav is a class rather than a function
- */
-
-
 #ifdef CH_LANG_CC
 /*
  *      _______              __
