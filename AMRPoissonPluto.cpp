@@ -67,7 +67,7 @@ AMRPoissonPluto::~AMRPoissonPluto()
 
 // Define this object and the boundary condition object
 void AMRPoissonPluto::define(Vector<LevelData<FArrayBox>* >   a_rhs,
-                             Vector<DisjointBoxLayout>        a_allGrids,
+                             Vector<DisjointBoxLayout>        a_grids,
                              Vector<ProblemDomain>            a_domain,
                              Vector<Real>                     a_dx,
                              Vector<int>                      a_ref_ratio,
@@ -76,7 +76,7 @@ void AMRPoissonPluto::define(Vector<LevelData<FArrayBox>* >   a_rhs,
 
   // Store the level data to be used later
   m_rhs       = a_rhs;
-  m_allGrids  = a_allGrids;
+  m_grids  = a_grids;
   m_domain    = a_domain;
   m_dx        = a_dx;
   m_numLevels = a_numLevels;
@@ -200,7 +200,7 @@ void ParseBC(FArrayBox& a_state,
 
    for (int lev=0; lev<=maxLevel; lev++)
      {
-       const DisjointBoxLayout& levelGrids = m_allGrids[lev];
+       const DisjointBoxLayout& levelGrids = m_grids[lev];
        phi[lev] = new LevelData<FArrayBox>(levelGrids, 1, IntVect::Unit);
        //rhs[lev] = new LevelData<FArrayBox>(levelGrids, 1, IntVect::Zero);
        resid[lev] = new LevelData<FArrayBox>(levelGrids, 1, IntVect::Zero);
@@ -219,7 +219,7 @@ void ParseBC(FArrayBox& a_state,
 
    BiCGStabSolver<LevelData<FArrayBox> > bottomSolver;
    //bottomSolver.m_verbosity = s_verbosity-2;
-   setupSolver(amrPoissonSolver, bottomSolver, m_allGrids, m_domain,
+   setupSolver(amrPoissonSolver, bottomSolver, m_grids, m_domain,
                m_ref_ratio, m_dx, m_numLevels);
 
    // do solve
@@ -241,7 +241,7 @@ void ParseBC(FArrayBox& a_state,
 
    if (writePlots)
      {
-       int numLevels = m_allGrids.size();
+       int numLevels = m_grids.size();
        Vector<LevelData<FArrayBox>* > plotData(numLevels, NULL);
 
        pout() << "Write Plots. norm=" << amrPoissonSolver->computeAMRResidual(resid,phi,rhs,level,0) << endl;
@@ -273,7 +273,7 @@ void ParseBC(FArrayBox& a_state,
        Real bogusVal = 1.0;
 
        WriteAMRHierarchyHDF5(fname,
-                             m_allGrids,
+                             m_grids,
                              plotData,
                              varNames,
                              m_domain[0].domainBox(),
