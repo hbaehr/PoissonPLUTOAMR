@@ -45,7 +45,7 @@ using std::ios;
 #include "AMRPoissonOp.H"
 #include "AMRMultiGrid.H"
 
-class AMRPoissonPluto// subclass to AMRPoissonOp or AMRLevelPluto?
+class AMRPoissonPluto : public AMRPoissonOp
 {
 public:
   /// Constructor
