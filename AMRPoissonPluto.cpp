@@ -198,7 +198,7 @@ void ParseBC(FArrayBox& a_state,
    // this is for convenience
    Vector<LevelData<FArrayBox>* > resid(numLevels, NULL);
 
-   for (int lev=0; lev<=maxLevel; lev++)
+   for (int lev=0; lev<=numLevels-1; lev++)
      {
        const DisjointBoxLayout& levelGrids = m_grids[lev];
        phi[lev] = new LevelData<FArrayBox>(levelGrids, 1, IntVect::Unit);
@@ -229,7 +229,7 @@ void ParseBC(FArrayBox& a_state,
      {
        bool zeroInitialGuess = true;
        pout() << "about to go into solve" << endl;
-       amrPoissonSolver->solve(phi, m_rhs, numLevels, 0, zeroInitialGuess);
+       amrPoissonSolver->solve(phi, m_rhs, numLevels-1, 0, zeroInitialGuess);
        pout() << "done solve" << endl;
      }
 
