@@ -171,7 +171,7 @@ void ParseBC(FArrayBox& a_state,
    AMRLevelOpFactory<LevelData<FArrayBox> >& castFact = (AMRLevelOpFactory<LevelData<FArrayBox> >& ) opFactory;
 
    a_amrPoissonSolver->define(a_domain[0], castFact,
-                      &a_bottomSolver, numLevels);
+                      &a_bottomSolver, a_level);
 
    // Multigrid solver parameters
    int numSmooth = 4;
