@@ -303,5 +303,3 @@ void ParseBC(FArrayBox& a_state,
 
    return status;
 }
-
-// Output gravpot [phi] and acceleration [-grad(phi)]: used by PLUTO/Src/HD/prim_eqn.c
