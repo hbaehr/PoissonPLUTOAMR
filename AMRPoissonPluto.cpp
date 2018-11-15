@@ -244,7 +244,7 @@ void ParseBC(FArrayBox& a_state,
        int numLevels = m_grids.size();
        Vector<LevelData<FArrayBox>* > plotData(numLevels, NULL);
 
-       pout() << "Write Plots. norm=" << amrPoissonSolver->computeAMRResidual(resid,phi,rhs,level,0) << endl;
+       pout() << "Write Plots. norm=" << amrPoissonSolver->computeAMRResidual(resid,phi,m_rhs,numLevels-1,0) << endl;
 
        for (int lev=0; lev<numLevels; lev++)
          {
