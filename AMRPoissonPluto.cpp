@@ -148,14 +148,14 @@ void ParseBC(FArrayBox& a_state,
     }
 }
 
- void AMRLevelPluto::setupSolver(AMRMultiGrid<LevelData<FArrayBox> > *a_amrPoissonSolver,
+void AMRLevelPluto::setupSolver(AMRMultiGrid<LevelData<FArrayBox> > *a_amrPoissonSolver,
                                  LinearSolver<LevelData<FArrayBox> >& a_bottomSolver,
                                  Vector<DisjointBoxLayout>&           a_grids,
                                  Vector<ProblemDomain>&               a_domain,
                                  Vector<int>&                         a_ref_ratio,
                                  Vector<Real>&                        a_dx,
                                  int                                  a_level)
- {
+{
    AMRPoissonOpFactory opFactory;
 
    // solving poisson problem here
@@ -185,8 +185,8 @@ void ParseBC(FArrayBox& a_state,
                                 numMG, maxIter, eps, hang, normThresh);
  }
 
- int AMRPoissonPluto::runSolver()
- {
+int AMRPoissonPluto::runSolver()
+{
    int status = 0, mg_type = 0;
 
    //int s_verbosity = 4;
