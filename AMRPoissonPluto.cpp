@@ -148,13 +148,13 @@ void ParseBC(FArrayBox& a_state,
     }
 }
 
-void AMRLevelPluto::setupSolver(AMRMultiGrid<LevelData<FArrayBox> > *a_amrPoissonSolver,
-                                 LinearSolver<LevelData<FArrayBox> >& a_bottomSolver,
-                                 Vector<DisjointBoxLayout>&           a_grids,
-                                 Vector<ProblemDomain>&               a_domain,
-                                 Vector<int>&                         a_ref_ratio,
-                                 Vector<Real>&                        a_dx,
-                                 int                                  a_level)
+void AMRPoissonPluto::setupSolver(AMRMultiGrid<LevelData<FArrayBox> > *a_amrPoissonSolver,
+                                  LinearSolver<LevelData<FArrayBox> >& a_bottomSolver,
+                                  Vector<DisjointBoxLayout>&           a_grids,
+                                  Vector<ProblemDomain>&               a_domain,
+                                  Vector<int>&                         a_ref_ratio,
+                                  Vector<Real>&                        a_dx,
+                                  int                                  a_level)
 {
    AMRPoissonOpFactory opFactory;
 
