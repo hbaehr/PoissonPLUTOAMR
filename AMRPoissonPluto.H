@@ -84,6 +84,8 @@ public:
 
   virtual void runSolver();
 
+  Vector<LevelData<FArrayBox>* > phi;
+
 protected:
 
   Vector<ProblemDomain>& m_domain;
