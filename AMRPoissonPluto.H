@@ -96,7 +96,7 @@ protected:
 
   Vector<int>& m_ref_ratio;
 
-  Vector<DisjointBoxLayout>& m_allGrids;
+  Vector<DisjointBoxLayout>& m_grids;
 
-  Vector<LevelData<FArrayBox> >& m_rhs;
+  Vector<LevelData<FArrayBox>* > m_rhs;
 };
