@@ -100,7 +100,7 @@ void ParseValue(Real* pos,
                 Side::LoHiSide* side,
                 Real* a_values)
 {
-  a_values[0]=0.;
+  a_values[0]=0.01;
 }
 
 void ParseBC(FArrayBox& a_state,
