@@ -94,7 +94,7 @@ void AMRPoissonPluto::define(Vector<LevelData<FArrayBox>* >   a_rhs,
 
   // Store the level data to be used later
   m_rhs       = a_rhs;
-  m_grids  = a_grids;
+  m_grids     = a_grids;
   m_domain    = a_domain;
   m_dx        = a_dx;
   m_numLevels = a_numLevels;
@@ -229,6 +229,97 @@ void ParseBC(FArrayBox& a_state,
                   else
                     {
                        MayDay::Error("bogus bc flag hi");
+                    }
+                }
+            } // end if is not periodic in ith direction
+        }
+    }
+}
+
+extern void convDiriBC_RBGS( FArrayBox&      a_state,
+                             const FArrayBox& a_rhs,
+                             const Box&      a_valid,
+                             const ProblemDomain& a_domain,
+                             Real a_dx,
+                             int             a_whichpass,
+                             int             a_dir,
+                             Side::LoHiSide  a_side);
+
+void convergeGS_BC( FArrayBox& a_state,
+                    const FArrayBox& a_rhs,
+                    const Box& a_valid,
+                    const ProblemDomain& a_domain,
+                    Real a_dx,
+                    int a_whichpass )
+{
+
+  if (!a_domain.domainBox().contains(a_state.box()))
+    {
+      if (!GlobalBCRS::s_areBCsParsed)
+        {
+          ParmParse pp;
+          pp.getarr("bc_lo", GlobalBCRS::s_bcLo, 0, SpaceDim);
+          pp.getarr("bc_hi", GlobalBCRS::s_bcHi, 0, SpaceDim);
+          GlobalBCRS::s_areBCsParsed = true;
+        }
+
+      for (int i=0; i<CH_SPACEDIM; ++i)
+        {
+          // don't do anything if periodic
+          if (!a_domain.isPeriodic(i))
+            {
+              Box ghostBoxLo = adjCellBox(a_valid, i, Side::Lo, 1);
+              Box ghostBoxHi = adjCellBox(a_valid, i, Side::Hi, 1);
+              if ( !a_domain.domainBox().contains(ghostBoxLo) && GlobalBCRS::s_bcLo[i]==0 )
+                {
+                  Interval stateInterval = a_state.interval();
+                  // iterate
+                  for (int kk=0;kk<10;kk++)
+                    {
+                      // apply BC
+                      DiriBC(a_state,
+                             a_valid,
+                             a_dx,
+                             true,
+                             ParseValue,
+                             i,
+                             Side::Lo,
+                             1);
+                      // apply G-S to boundary
+                      convDiriBC_RBGS(a_state,
+                                      a_rhs,
+                                      a_valid,
+                                      a_domain,
+                                      a_dx,
+                                      a_whichpass,
+                                      i,
+                                      Side::Lo);
+                    }
+                }
+              if (!a_domain.domainBox().contains(ghostBoxHi) && GlobalBCRS::s_bcHi[i]==0 )
+                {
+                  Interval stateInterval = a_state.interval();
+                  // iterate
+                  for (int kk=0;kk<10;kk++)
+                    {
+                      // apply BC
+                      DiriBC(a_state,
+                             a_valid,
+                             a_dx,
+                             true,
+                             ParseValue,
+                             i,
+                             Side::Hi,
+                             1);
+                      // apply G-S to boundary
+                      convDiriBC_RBGS(a_state,
+                                      a_rhs,
+                                      a_valid,
+                                      a_domain,
+                                      a_dx,
+                                      a_whichpass,
+                                      i,
+                                      Side::Hi);
                     }
                 }
             } // end if is not periodic in ith direction
