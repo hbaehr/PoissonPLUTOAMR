@@ -130,6 +130,18 @@ void ParseBC(FArrayBox& a_state,
 
   if (!a_domain.domainBox().contains(a_state.box()))
     {
+      if (!GlobalBCRS::s_areBCsParsed)
+        {
+          //ParmParse pp;
+          //pp.getarr("bc_lo", GlobalBCRS::s_bcLo, 0, SpaceDim);
+          //pp.getarr("bc_hi", GlobalBCRS::s_bcHi, 0, SpaceDim);
+          for (int i=0; i<CH_SPACEDIM; ++i)
+            {
+              GlobalBCRS::s_bcLo[i] = 0;
+              GlobalBCRS::s_bcHi[i] = 0;
+            }
+          GlobalBCRS::s_areBCsParsed = true;
+        }
       Box valid = a_valid;
       for (int i=0; i<CH_SPACEDIM; ++i)
         {
