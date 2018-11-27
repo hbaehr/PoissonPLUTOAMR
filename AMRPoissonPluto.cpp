@@ -257,9 +257,14 @@ void convergeGS_BC( FArrayBox& a_state,
     {
       if (!GlobalBCRS::s_areBCsParsed)
         {
-          ParmParse pp;
-          pp.getarr("bc_lo", GlobalBCRS::s_bcLo, 0, SpaceDim);
-          pp.getarr("bc_hi", GlobalBCRS::s_bcHi, 0, SpaceDim);
+          //ParmParse pp;
+          //pp.getarr("bc_lo", GlobalBCRS::s_bcLo, 0, SpaceDim);
+          //pp.getarr("bc_hi", GlobalBCRS::s_bcHi, 0, SpaceDim);
+          for (int i=0; i<CH_SPACEDIM; ++i)
+            {
+              GlobalBCRS::s_bcLo[i] = 0;
+              GlobalBCRS::s_bcHi[i] = 0;
+            }
           GlobalBCRS::s_areBCsParsed = true;
         }
 
