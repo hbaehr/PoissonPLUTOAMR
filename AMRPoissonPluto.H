@@ -68,6 +68,22 @@ public:
                       Vector<int>&                      a_ref_ratio
                       int                               a_numLevels);
 
+  /*extern void convDiriBC_RBGS( FArrayBox&              a_state,
+                               const FArrayBox&        a_rhs,
+                               const Box&              a_valid,
+                               const ProblemDomain&    a_domain,
+                               Real                    a_dx,
+                               int                     a_whichpass,
+                               int                     a_dir,
+                               Side::LoHiSide          a_side);
+
+  /*void convergeGS_BC( FArrayBox& a_state,
+                      const FArrayBox& a_rhs,
+                      const Box& a_valid,
+                      const ProblemDomain& a_domain,
+                      Real a_dx,
+                      int a_whichpass )
+
 /*  virtual void setRHS(Vector<LevelData<FArrayBox>* > a_rhs,
                       Vector<ProblemDomain>&         a_domain,
                       Vector<int>&                   a_ref_ratio,
