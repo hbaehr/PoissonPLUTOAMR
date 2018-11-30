@@ -64,7 +64,7 @@ AMRPoissonPluto::AMRPoissonPluto()
 AMRPoissonPluto::~AMRPoissonPluto()
 {
 }
-
+/*
 class GlobalBCRS
 {
 public:
@@ -81,7 +81,7 @@ std::vector<int>  GlobalBCRS::s_bcHi = std::vector<int>();
 RealVect          GlobalBCRS::s_trigvec = RealVect::Zero;
 bool              GlobalBCRS::s_areBCsParsed= false;
 bool              GlobalBCRS::s_valueParsed= false;
-bool              GlobalBCRS::s_trigParsed= false;
+bool              GlobalBCRS::s_trigParsed= false;*/
 
 // Define this object and the boundary condition object
 void AMRPoissonPluto::define(Vector<LevelData<FArrayBox>* >   a_rhs,
@@ -129,7 +129,7 @@ void ParseBC(FArrayBox& a_state,
 {
 
   if (!a_domain.domainBox().contains(a_state.box()))
-    {
+    {/*
       if (!GlobalBCRS::s_areBCsParsed)
         {
           //ParmParse pp;
@@ -141,7 +141,7 @@ void ParseBC(FArrayBox& a_state,
               GlobalBCRS::s_bcHi[i] = 0;
             }
           GlobalBCRS::s_areBCsParsed = true;
-        }
+        }*/
       Box valid = a_valid;
       for (int i=0; i<CH_SPACEDIM; ++i)
         {
@@ -151,7 +151,7 @@ void ParseBC(FArrayBox& a_state,
               Box ghostBoxLo = adjCellBox(valid, i, Side::Lo, 1);
               Box ghostBoxHi = adjCellBox(valid, i, Side::Hi, 1);
               if (!a_domain.domainBox().contains(ghostBoxLo))
-                {
+                {/*
                    if (GlobalBCRS::s_bcLo[i] == 1)
                      {
                        if (!GlobalBCRS::s_printedThatLo[i])
@@ -181,7 +181,7 @@ void ParseBC(FArrayBox& a_state,
                              }
                            GlobalBCRS::s_printedThatLo[i] = true;
                            if (s_verbosity>5)pout() << "const diri bcs lo for direction " << i << endl;
-                         }
+                         }*/
                       DiriBC(a_state,
                              valid,
                              a_dx,
@@ -190,15 +190,15 @@ void ParseBC(FArrayBox& a_state,
                              i,
                              Side::Lo,
                              1);
-                    }
+                    /*}
                   else
                     {
                       MayDay::Error("bogus bc flag lo");
-                    }
+                    }*/
                 }
 
               if (!a_domain.domainBox().contains(ghostBoxHi))
-                {
+                {/*
                    if (GlobalBCRS::s_bcHi[i] == 1)
                      {
                        if (!GlobalBCRS::s_printedThatHi[i])
@@ -228,7 +228,7 @@ void ParseBC(FArrayBox& a_state,
                              }
                            GlobalBCRS::s_printedThatHi[i] = true;
                            if (s_verbosity>5)pout() << "const diri bcs hi for direction " << i << endl;
-                         }
+                         }*/
                       DiriBC(a_state,
                              valid,
                              a_dx,
@@ -237,17 +237,17 @@ void ParseBC(FArrayBox& a_state,
                              i,
                              Side::Hi,
                              1);
-                    }
+                  /*  }
                   else
                     {
                        MayDay::Error("bogus bc flag hi");
-                    }
+                    }*/
                 }
             } // end if is not periodic in ith direction
         }
     }
 }
-
+#if 0
 extern void convDiriBC_RBGS( FArrayBox&      a_state,
                              const FArrayBox& a_rhs,
                              const Box&      a_valid,
@@ -343,7 +343,7 @@ void convergeGS_BC( FArrayBox& a_state,
         }
     }
 }
-
+#endif
 void AMRPoissonPluto::setupSolver(AMRMultiGrid<LevelData<FArrayBox> > *a_amrPoissonSolver,
                                   LinearSolver<LevelData<FArrayBox> >& a_bottomSolver,
                                   Vector<DisjointBoxLayout>&           a_grids,
@@ -381,7 +381,7 @@ void AMRPoissonPluto::setupSolver(AMRMultiGrid<LevelData<FArrayBox> > *a_amrPois
                                 numMG, maxIter, eps, hang, normThresh);
  }
 
-int AMRPoissonPluto::runSolver()
+Vector<LevelData<FArrayBox> > AMRPoissonPluto::runSolver()
 {
    int status = 0, mg_type = 0;
 
@@ -487,15 +487,15 @@ int AMRPoissonPluto::runSolver()
      } // end if writing plots
 #endif // end if HDF5
 
+   delete amrPoissonSolver;
+
+   return phi;
+
    // clean up
    for (int lev=0; lev<phi.size(); lev++)
      {
        delete phi[lev];
-       delete m_rhs[lev];
+       //delete m_rhs[lev];
        delete resid[lev];
      }
-
-   delete amrPoissonSolver;
-
-   return status;
 }
