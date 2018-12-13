@@ -19,13 +19,10 @@
 #include <machine/hal_sysinfo.h>
 #endif
 
-//#ifdef CH_MPI
 #include "CH_Attach.H"
-//#endif
 
 #include "CH_HDF5.H"
 #include "parstream.H"
-#include "CH_Attach.H"
 #include "CH_Timer.H"
 #include "memusage.H"
 #include "memtrack.H"
