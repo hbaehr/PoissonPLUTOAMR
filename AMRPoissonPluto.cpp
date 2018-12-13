@@ -25,8 +25,10 @@
 
 #include "CH_HDF5.H"
 #include "parstream.H"
-//#include "CH_Timer.H"
+#include "CH_Attach.H"
+#include "CH_Timer.H"
 #include "memusage.H"
+#include "memtrack.H"
 
 #include "LevelData.H"
 #include "FArrayBox.H"
@@ -37,11 +39,8 @@
 #include "ProblemDomain.H"
 #include "BCFunc.H"
 #include "BiCGStabSolver.H"
-//#include "BoxIterator.H"
 #include "CONSTANTS.H"
 
-//#include "AMR.H"
-//#include "AMRLevelPlutoFactory.H"
 #include "AMRPoissonOp.H"
 #include "AMRMultiGrid.H"
 
@@ -352,6 +351,8 @@ void AMRPoissonPluto::setupSolver(AMRMultiGrid<LevelData<FArrayBox> > *a_amrPois
                                   Vector<Real>&                        a_dx,
                                   int                                  a_level)
 {
+   CH_TIME("setupSolver");
+
    AMRPoissonOpFactory opFactory;
 
    // solving poisson problem here
@@ -381,8 +382,10 @@ void AMRPoissonPluto::setupSolver(AMRMultiGrid<LevelData<FArrayBox> > *a_amrPois
                                 numMG, maxIter, eps, hang, normThresh);
  }
 
-Vector<LevelData<FArrayBox> > AMRPoissonPluto::runSolver()
+int AMRPoissonPluto::runSolver()
 {
+   CH_TIME("runSolver");
+
    int status = 0, mg_type = 0;
 
    //int s_verbosity = 4;
