@@ -489,7 +489,7 @@ int AMRPoissonPluto::runSolver()
 
    delete amrPoissonSolver;
 
-   return phi;
+   return status;
 
    // clean up
    for (int lev=0; lev<phi.size(); lev++)
