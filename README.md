@@ -28,4 +28,6 @@ In Src/pluto.h (or /Src/HD/mod_defs ???): SELFGRAV needs to be added to NVARS to
 
 In Src/initialize.c: The quantity Phi needs to be added to the main data struture at initialization
 
+In Src/MHD/rhs.c: The update sweep needs to be modified to exclude PHI
+
 -Hans Baehr

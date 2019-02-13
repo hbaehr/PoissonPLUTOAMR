@@ -495,7 +495,7 @@ int AMRPoissonPluto::runSolver()
    for (int lev=0; lev<phi.size(); lev++)
      {
        delete phi[lev];
-       delete m_rhs[lev];
+       //delete m_rhs[lev];
        delete resid[lev];
      }
 }
