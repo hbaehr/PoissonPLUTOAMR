@@ -87,7 +87,6 @@ void AMRPoissonPluto::define(Vector<LevelData<FArrayBox>* >   a_rhs,
                              Vector<int>                      a_ref_ratio,
                              int                              a_numLevels)
 {
-
   // Store the level data to be used later
   m_rhs       = a_rhs;
   m_grids     = a_grids;
@@ -96,8 +95,6 @@ void AMRPoissonPluto::define(Vector<LevelData<FArrayBox>* >   a_rhs,
   m_numLevels = a_numLevels;
   m_ref_ratio = a_ref_ratio;
   m_isDefined = true;
-//  AMRMultiGrid<LevelData<FArrayBox> > *amrSolver;
-//  BiCGStabSolver<LevelData<FArrayBox> > bottomSolver;
 }
 
 int s_verbosity = 1;
