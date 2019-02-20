@@ -22,12 +22,10 @@ Instructions to make this work:
 
 Additionally:
 
-In Src/struct.h: the data structure needs to allocate new memory for the addition of Phi
+In Src/struct.h: the data structure needs to make room for Phi
 
-In Src/pluto.h (or /Src/HD/mod_defs ???): SELFGRAV needs to be added to NVARS total, either separately or through NFLX
+In Src/pluto.h or /Src/HD/mod_defs: SELFGRAV needs to be added to NVAR total, either separately or through NSCL
 
-In Src/initialize.c: The quantity Phi needs to be added to the main data struture at initialization
-
-In Src/MHD/rhs.c: The update sweep needs to be modified to exclude PHI
+In Src/Chombo/PatchEuler.cpp: need to allocate the memory for the space in the data structure for Phi
 
 -Hans Baehr
