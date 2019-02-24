@@ -275,10 +275,11 @@ Real AMRLevelPluto::advance()
 
       const Interval densityInterval(0,0);
       const Interval gravityInterval(m_numStates-1,m_numStates);
+      m_levPhi.define(m_grids,1,m_numGhost*IntVect::Unit);
       for (int lev=0; lev<=numLevels-1; lev++)
         {
           AMRLevelPluto* amrPlutoLevel = dynamic_cast<AMRLevelPluto*>(onTheLev[lev]);
-          phi[lev]->copyTo(densityInterval,(amrPlutoLevel->m_UNew),gravityInterval);
+          phi[lev]->copyTo(densityInterval,amrPlutoLevel->m_levPhi,densityInterval);
         }
 
       // clean up dynamically allocated memory
@@ -303,6 +304,7 @@ Real AMRLevelPluto::advance()
                             *finerFR,
                             *coarserFR,
                             m_split_tags,
+			    m_levPhi,
                             *coarserDataOld,
                             tCoarserOld,
                             *coarserDataNew,
@@ -321,6 +323,7 @@ Real AMRLevelPluto::advance()
                             *finerFR,
                             *coarserFR,
                             m_split_tags,
+			    m_levPhi,
                             *coarserDataOld,
                             tCoarserOld,
                             *coarserDataNew,
