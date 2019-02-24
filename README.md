@@ -12,6 +12,8 @@ Instructions to make this work:
 
 -Add a segment of code to AMRLevelPluto.cpp in the advance() function which calls the solver during runtime at each coarse timestep
 
+-Add the Self_Gravity directory to the main PLUTO/Src directory: This part is still a work in progress
+
 -In the template makefile ($PLUTO_DIR/Src/Templates/makefile.chombo) add:
 
 ---INCLUDE_DIRS += -I$(CHOMBO_HOME)/src/AMRElliptic *ABOVE* the AMRTimeDependent include
@@ -20,11 +22,11 @@ Instructions to make this work:
 
 ---add AMRPoissonPluto.H and AMRPoissonPluto.o to the list of headers and object files
 
+---add variables to transfer potential down to the patch level: AMRLevelPluto -> LevelPluto -> PatchPluto -> PatchEuler
+
 Additionally:
 
 In Src/struct.h: the data structure needs to make room for Phi
-
-In Src/pluto.h or /Src/HD/mod_defs: SELFGRAV needs to be added to NVAR total, either separately or through NSCL
 
 In Src/Chombo/PatchEuler.cpp: need to allocate the memory for the space in the data structure for Phi
 
