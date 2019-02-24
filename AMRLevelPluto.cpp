@@ -232,6 +232,7 @@ Real AMRLevelPluto::advance()
     finerFR = &m_fluxRegister;
   }
 
+  #if SELFGRAV
   if (!m_hasCoarser)
     {
       Vector<AMRLevel*> onTheLev = AMRLevel::getAMRLevelHierarchy();
@@ -285,10 +286,11 @@ Real AMRLevelPluto::advance()
         {
           delete rhs[lev];
           //delete temp_rhs[lev]
-          delete rhs[lev];
+          delete phi[lev];
         }
 
     }
+  #endif
 
   // we don't need the flux in the simple hyperbolic case...
   LevelData<FArrayBox> flux[SpaceDim];
