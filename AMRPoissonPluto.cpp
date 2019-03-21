@@ -376,7 +376,7 @@ void AMRPoissonPluto::setupSolver(AMRMultiGrid<LevelData<FArrayBox> > *a_amrPois
                                 numMG, maxIter, eps, hang, normThresh);
  }
 
-int AMRPoissonPluto::runSolver()
+Vector<LevelData<FArrayBox>* > AMRPoissonPluto::runSolver()
 {
    CH_TIME("runSolver");
 
@@ -486,7 +486,7 @@ int AMRPoissonPluto::runSolver()
 
    delete amrPoissonSolver;
 
-   return status;
+   return phi;
 
    // clean up
    for (int lev=0; lev<phi.size(); lev++)
