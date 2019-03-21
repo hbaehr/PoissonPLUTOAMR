@@ -239,7 +239,9 @@ Real AMRLevelPluto::advance()
       int numLevels = onTheLev.size();
 
       // Create Vector containers for the multilevel input to the solvers
-      Vector<LevelData<FArrayBox>* >              phi(numLevels);
+      //Vector<LevelData<FArrayBox>* >              phi(numLevels);
+      m_phi.resize(numLevels, NULL);
+
       Vector<LevelData<FArrayBox>* >              rhs(numLevels);
       Vector<LevelData<FArrayBox>* >              temp_rhs(numLevels);
       Vector<DisjointBoxLayout>                   grids(numLevels);
@@ -255,7 +257,7 @@ Real AMRLevelPluto::advance()
           domain[lev]          = amrPlutoLevel->m_problem_domain;
           dx[lev]              = amrPlutoLevel->m_dx;
           ref_ratio[lev]       = amrPlutoLevel->m_ref_ratio;
-          temp_rhs[lev]        = amrPlutoLevel->m_UNew;
+          temp_rhs[lev]        = &(amrPlutoLevel->m_UNew);
 
           const Interval densityInterval(0,0);
           rhs[lev]             = new LevelData<FArrayBox>(grids[lev], 1, IntVect::Zero);
@@ -271,16 +273,16 @@ Real AMRLevelPluto::advance()
                                ref_ratio,
                                numLevels);
 
-      phi = amrSelfGravSolver.runSolver();
+      m_phi = amrSelfGravSolver.runSolver();
 
       const Interval densityInterval(0,0);
-      const Interval gravityInterval(m_numStates-1,m_numStates);
-      m_levPhi.define(m_grids,1,m_numGhost*IntVect::Unit);
-      for (int lev=0; lev<=numLevels-1; lev++)
-        {
-          AMRLevelPluto* amrPlutoLevel = dynamic_cast<AMRLevelPluto*>(onTheLev[lev]);
-          phi[lev]->copyTo(densityInterval,amrPlutoLevel->m_levPhi,densityInterval);
-        }
+      //const Interval gravityInterval(m_numStates-1,m_numStates);
+      //m_levPhi.define(m_grids,1,m_numGhost*IntVect::Unit);
+      //for (int lev=0; lev<=numLevels-1; lev++)
+      //  {
+      //    AMRLevelPluto* amrPlutoLevel = dynamic_cast<AMRLevelPluto*>(onTheLev[lev]);
+      //    phi[lev]->copyTo(densityInterval,amrPlutoLevel->m_levPhi,densityInterval);
+      //  }
 
       // clean up dynamically allocated memory
       for (int lev=0; lev<=numLevels-1; lev++)
@@ -304,7 +306,7 @@ Real AMRLevelPluto::advance()
                             *finerFR,
                             *coarserFR,
                             m_split_tags,
-			    m_levPhi,
+			    *m_phi[m_level],
                             *coarserDataOld,
                             tCoarserOld,
                             *coarserDataNew,
@@ -323,7 +325,7 @@ Real AMRLevelPluto::advance()
                             *finerFR,
                             *coarserFR,
                             m_split_tags,
-			    m_levPhi,
+			    *m_phi[m_level],
                             *coarserDataOld,
                             tCoarserOld,
                             *coarserDataNew,
