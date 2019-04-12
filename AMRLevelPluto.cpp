@@ -233,49 +233,48 @@ Real AMRLevelPluto::advance()
   }
 
   #if SELFGRAV
-  if (!m_hasCoarser)
-    {
-      Vector<AMRLevel*> onTheLev = AMRLevel::getAMRLevelHierarchy();
-      int numLevels = onTheLev.size();
+   if (!m_hasCoarser)
+     {
+       Vector<AMRLevel*> onTheLev = AMRLevel::getAMRLevelHierarchy();
+       int numLevels = onTheLev.size();
 
-      // Create Vector containers for the multilevel input to the solvers
-      //Vector<LevelData<FArrayBox>* >              phi(numLevels);
-      m_phi.resize(numLevels, NULL);
+       // Create Vector containers for the multilevel input to the solvers
+       m_phi.resize(numLevels, NULL);
 
-      Vector<LevelData<FArrayBox>* >              rhs(numLevels);
-      Vector<LevelData<FArrayBox>* >              temp_rhs(numLevels);
-      Vector<DisjointBoxLayout>                   grids(numLevels);
-      Vector<ProblemDomain>                       domain(numLevels);
-      Vector<Real>                                dx(numLevels);
-      Vector<int>                                 ref_ratio(numLevels);
+       Vector<LevelData<FArrayBox>* >              rhs(numLevels);
+       Vector<LevelData<FArrayBox>* >              temp_rhs(numLevels);
+       Vector<DisjointBoxLayout>                   grids(numLevels);
+       Vector<ProblemDomain>                       domain(numLevels);
+       Vector<Real>                                dx(numLevels);
+       Vector<int>                                 ref_ratio(numLevels);
 
-      // Put all the level metadata into the containers at he appropriate level
-      for (int lev=0; lev<numLevels; lev++)
-        {
-          AMRLevelPluto* amrPlutoLevel = dynamic_cast<AMRLevelPluto*>(onTheLev(lev));
-          grids[lev]           = amrPlutoLevel->m_grids;
-          domain[lev]          = amrPlutoLevel->m_problem_domain;
-          dx[lev]              = amrPlutoLevel->m_dx;
-          ref_ratio[lev]       = amrPlutoLevel->m_ref_ratio;
-          temp_rhs[lev]        = &(amrPlutoLevel->m_UNew);
+       // Put all the level metadata into the containers at he appropriate level
+       for (int lev=0; lev<numLevels; lev++)
+         {
+           AMRLevelPluto* amrPlutoLevel = dynamic_cast<AMRLevelPluto*>(onTheLev(lev));
+           grids[lev]           = amrPlutoLevel->m_grids;
+           domain[lev]          = amrPlutoLevel->m_problem_domain;
+           dx[lev]              = amrPlutoLevel->m_dx;
+           ref_ratio[lev]       = amrPlutoLevel->m_ref_ratio;
+           temp_rhs[lev]        = &(amrPlutoLevel->m_UNew);
 
-          const Interval densityInterval(0,0);
-          rhs[lev]             = new LevelData<FArrayBox>(grids[lev], 1, IntVect::Zero);
-          temp_rhs[lev]->copyTo(densityInterval, *rhs[lev], densityInterval);
-          //delete amrPlutoLevel;
-        }
-      // Set up Poisson solver objects
-      AMRPoissonPluto amdSelfGravSolver;
-      amrSelfGravSolver.define(rhs,
-                               grids,
-                               domain,
-                               dx,
-                               ref_ratio,
-                               numLevels);
+           const Interval densityInterval(0,0);
+           rhs[lev]             = new LevelData<FArrayBox>(grids[lev], 1, IntVect::Zero);
+           temp_rhs[lev]->copyTo(densityInterval, *rhs[lev], densityInterval);
+           //delete amrPlutoLevel;
+         }
+       // Set up Poisson solver objects
+       AMRPoissonPluto amdSelfGravSolver;
+       amrSelfGravSolver.define(rhs,
+                                grids,
+                                domain,
+                                dx,
+                                ref_ratio,
+                                numLevels);
 
-      m_phi = amrSelfGravSolver.runSolver();
+       m_phi = amrSelfGravSolver.runSolver();
 
-      const Interval densityInterval(0,0);
+       const Interval densityInterval(0,0);
       //const Interval gravityInterval(m_numStates-1,m_numStates);
       //m_levPhi.define(m_grids,1,m_numGhost*IntVect::Unit);
       //for (int lev=0; lev<=numLevels-1; lev++)
@@ -285,14 +284,13 @@ Real AMRLevelPluto::advance()
       //  }
 
       // clean up dynamically allocated memory
-      for (int lev=0; lev<=numLevels-1; lev++)
-        {
-          delete rhs[lev];
-          //delete temp_rhs[lev]
-          delete phi[lev];
-        }
+       for (int lev=0; lev<=numLevels-1; lev++)
+         {
+           delete rhs[lev];
+           //delete temp_rhs[lev]
+         }
 
-    }
+     }
   #endif
 
   // we don't need the flux in the simple hyperbolic case...
