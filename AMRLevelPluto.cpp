@@ -212,9 +212,6 @@ Real AMRLevelPluto::advance()
   if (m_hasCoarser)
   {
     AMRLevelPluto* coarserPtr = getCoarserLevel();
-    #if SELFGRAV
-    m_phi = coarserPtr->m_phi;
-    #endif
 
     // Recall that my flux register goes between my level and the next
     // finer level
@@ -292,7 +289,12 @@ Real AMRLevelPluto::advance()
            delete rhs[lev];
            //delete temp_rhs[lev]
          }
+     }
 
+   if (m_hasCoarser)
+     {
+       AMRLevelPluto* coarserPtr = getCoarserLevel();
+       m_phi = coarserPtr->m_phi;
      }
   #endif
 
