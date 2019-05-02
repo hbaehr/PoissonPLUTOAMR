@@ -293,8 +293,19 @@ Real AMRLevelPluto::advance()
 
    if (m_hasCoarser)
      {
-       AMRLevelPluto* coarserPtr = getCoarserLevel();
-       m_phi = coarserPtr->m_phi;
+       Vector<AMRLevel*> onTheLev = AMRLevel::getAMRLevelHierarchy();
+       int numLevels = onTheLev.size();
+
+       m_phi.resize(numLevels,NULL);
+
+       for (int lev=0; lev<numLevels; lev++)
+	 {
+	   AMRLevelPluto* zeroLevel = (AMRLevelPluto*)(onTheLev[0]);
+	   m_phi[lev]   = zeroLevel->m_phi[lev];
+	 }
+       
+       /*AMRLevelPluto* coarserPtr = getCoarserLevel();
+	 m_phi = coarserPtr->m_phi;*/
      }
   #endif
 
