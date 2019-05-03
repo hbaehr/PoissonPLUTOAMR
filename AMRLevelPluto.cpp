@@ -274,15 +274,6 @@ Real AMRLevelPluto::advance()
 
        m_phi = amrSelfGravSolver.runSolver();
 
-       const Interval densityInterval(0,0);
-      //const Interval gravityInterval(m_numStates-1,m_numStates);
-      //m_levPhi.define(m_grids,1,m_numGhost*IntVect::Unit);
-      //for (int lev=0; lev<=numLevels-1; lev++)
-      //  {
-      //    AMRLevelPluto* amrPlutoLevel = dynamic_cast<AMRLevelPluto*>(onTheLev[lev]);
-      //    phi[lev]->copyTo(densityInterval,amrPlutoLevel->m_levPhi,densityInterval);
-      //  }
-
       // clean up dynamically allocated memory
        for (int lev=0; lev<=numLevels-1; lev++)
          {
@@ -304,7 +295,7 @@ Real AMRLevelPluto::advance()
             AMRLevelPluto* zeroLevel = (AMRLevelPluto*)(onTheLev[0]);
             grids[lev]               = amrPlutoLevel->m_grids;
             m_phi[lev]               = new LevelData<FArrayBox>(grids[lev], 1, IntVect::Zero);
-            m_phi[lev]               = zeroLevel->m_phi;
+            m_phi[lev]               = zeroLevel->m_phi[lev];
           }
        
        /*AMRLevelPluto* coarserPtr = getCoarserLevel();
