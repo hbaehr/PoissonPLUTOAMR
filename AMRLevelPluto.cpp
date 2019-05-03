@@ -286,15 +286,16 @@ Real AMRLevelPluto::advance()
      {
         Vector<AMRLevel*> onTheLev = AMRLevel::getAMRLevelHierarchy();
         int numLevels = onTheLev.size();
+	//Vector<DisjointBoxLayout> grids(numLevels); 
         //Vector<LevelData<FArrayBox>* > m_phi;
         m_phi.resize(numLevels,NULL);
         
         for (int lev=0; lev<m_level; lev++)
           {
-            AMRLevelPluto* amrPlutoLevel = dynamic_cast<AMRLevelPluto>(onTheLev[lev]);
+            //AMRLevelPluto* amrPlutoLevel = dynamic_cast<AMRLevelPluto>(onTheLev[lev]);
             AMRLevelPluto* zeroLevel = (AMRLevelPluto*)(onTheLev[0]);
-            grids[lev]               = amrPlutoLevel->m_grids;
-            m_phi[lev]               = new LevelData<FArrayBox>(grids[lev], 1, IntVect::Zero);
+            //grids[lev]               = amrPlutoLevel->m_grids;
+            //m_phi[lev]               = new LevelData<FArrayBox>(grids[lev], 1, IntVect::Zero);
             m_phi[lev]               = zeroLevel->m_phi[lev];
           }
        
