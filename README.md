@@ -22,12 +22,22 @@ Instructions to make this work:
 
 ---add AMRPoissonPluto.H and AMRPoissonPluto.o to the list of headers and object files
 
----add variables to transfer potential down to the patch level: AMRLevelPluto -> LevelPluto -> PatchPluto -> PatchEuler
+---add variables to transfer potential down to the patch level: AMRLevelPluto -> LevelPluto -> PatchEuler
 
 Additionally:
 
 In Src/struct.h: the data structure needs to make room for Phi
 
 In Src/Chombo/PatchEuler.cpp: need to allocate the memory for the space in the data structure for Phi
+
+TODO:
+
+-Make potential available to level integrator on refined levels
+
+-Resolve memory leak
+
+-More sophisticated boundary conditions
+
+-Additional refinedment criterion
 
 -Hans Baehr
