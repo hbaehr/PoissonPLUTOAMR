@@ -291,7 +291,7 @@ Real AMRLevelPluto::advance()
         Vector<AMRLevel*> onTheLev = AMRLevel::getAMRLevelHierarchy();
         int numLevels = onTheLev.size();
 
-	// Make sure m_phi is large enough to hold all the levels in the heierarchy
+	// Make sure m_phi is large enough to hold all the levels in the hierarchy
         m_phi.resize(numLevels,NULL);
 
 	//Loop through the Vector<> to define the potential at all levels
