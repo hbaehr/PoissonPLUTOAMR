@@ -232,15 +232,17 @@ Real AMRLevelPluto::advance()
     finerFR = &m_fluxRegister;
   }
 
+  // ***** This is where the self-gravity solver begins *****
   #if SELFGRAV
+  // Solve for potential only on the coarsest level, l = 0
    if (!m_hasCoarser)
      {
+       // Get level hierarchy
        Vector<AMRLevel*> onTheLev = AMRLevel::getAMRLevelHierarchy();
        int numLevels = onTheLev.size();
 
-       // Create Vector containers for the multilevel input to the solvers
+       // Create Vector containers for the multilevel input to the solvers and ensure m_phi is large enough
        m_phi.resize(numLevels, NULL);
-
        Vector<LevelData<FArrayBox>* >              rhs(numLevels);
        Vector<LevelData<FArrayBox>* >              temp_rhs(numLevels);
        Vector<DisjointBoxLayout>                   grids(numLevels);
@@ -263,7 +265,7 @@ Real AMRLevelPluto::advance()
            temp_rhs[lev]->copyTo(densityInterval, *rhs[lev], densityInterval);
            //delete amrPlutoLevel;
          }
-       // Set up Poisson solver objects
+       // Set up Poisson solver objects and solve for the potential m_phi
        AMRPoissonPluto amdSelfGravSolver;
        amrSelfGravSolver.define(rhs,
                                 grids,
@@ -282,27 +284,25 @@ Real AMRLevelPluto::advance()
          }
      }
 
+   // When level l != 0, the potential contained in m_phi needs to be accessed from the l = 0 level
    if (m_hasCoarser)
      {
+       // Get level hierarchy
         Vector<AMRLevel*> onTheLev = AMRLevel::getAMRLevelHierarchy();
         int numLevels = onTheLev.size();
-	//Vector<DisjointBoxLayout> grids(numLevels); 
-        //Vector<LevelData<FArrayBox>* > m_phi;
+
+	// Make sure m_phi is large enough to hold all the levels in the heierarchy
         m_phi.resize(numLevels,NULL);
-        
+
+	//Loop through the Vector<> to define the potential at all levels
         for (int lev=0; lev<m_level; lev++)
           {
-            //AMRLevelPluto* amrPlutoLevel = dynamic_cast<AMRLevelPluto>(onTheLev[lev]);
             AMRLevelPluto* zeroLevel = (AMRLevelPluto*)(onTheLev[0]);
-            //grids[lev]               = amrPlutoLevel->m_grids;
-            //m_phi[lev]               = new LevelData<FArrayBox>(grids[lev], 1, IntVect::Zero);
-            m_phi[lev]               = zeroLevel->m_phi[lev];
+            m_phi[lev]               = zeroLevel->m_phi[lev]; // <---- This is where I believe the problem is
           }
-       
-       /*AMRLevelPluto* coarserPtr = getCoarserLevel();
-	 m_phi = coarserPtr->m_phi;*/
      }
   #endif
+   // ***** This is the end of the self-gravity solver *****
 
   // we don't need the flux in the simple hyperbolic case...
   LevelData<FArrayBox> flux[SpaceDim];
