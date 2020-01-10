@@ -12,7 +12,7 @@ Instructions to make this work:
 
 -Add a segment of code to AMRLevelPluto.cpp in the advance() function which calls the solver during runtime at each coarse timestep
 
--Add the Self_Gravity directory to the main PLUTO/Src directory: This part is still a work in progress
+---More details on the above to come
 
 -In the template makefile ($PLUTO_DIR/Src/Templates/makefile.chombo) add:
 
@@ -29,6 +29,8 @@ Additionally:
 In Src/struct.h: the data structure needs to make room for Phi
 
 In Src/Chombo/PatchEuler.cpp: need to allocate the memory for the space in the data structure for Phi
+
+In Src/pluto.h: the SELFGRAV flag needs to be added
 
 TODO:
 
