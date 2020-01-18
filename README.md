@@ -8,7 +8,7 @@ The majority of the code is based off a working example created by the Chombo de
 
 At the moment it currently works with Cartesian coordinates and periodic boundary conditions as long as additional levels of mesh refinement are not needed.
 
-Instructions to make this work:
+## Instructions to make this work:
 
 ### Changes necessary for the Chombo part of the Code:
 
@@ -38,7 +38,7 @@ In Src/prototypes.h: modify the functions RightHandSide and RightHandSideSource 
 
 In Src/Time_Stepping/update_stage.c: modify the calls of the above functions to use the d structure
 
-TODO:
+## TODO:
 
 -Make potential available to level integrator on refined levels
 
