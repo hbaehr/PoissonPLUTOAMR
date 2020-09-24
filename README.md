@@ -4,7 +4,7 @@
 
 A module for solving the Poisson equation in an adaptive mesh (AMR) framework. This is a part of the PLUTO code, which through the Chombo libraries has AMR capabilities.
 
-The majority of the code is based off a working example created by the Chombo development team and modified to work with the AMR framework existing in PLUTO.
+The majority of the code is based off a working example created by the Chombo development team and modified to work with the AMR framework existing in PLUTO. See the example at Chombo-3.2/releasedExamples/AMRPoisson/execCell/poissonSolve.cpp
 
 At the moment it currently works with Cartesian coordinates and periodic boundary conditions as long as additional levels of mesh refinement are not needed.
 
@@ -24,11 +24,15 @@ At the moment it currently works with Cartesian coordinates and periodic boundar
 
 ---add AMRPoissonPluto.H and AMRPoissonPluto.o to the list of headers and object files
 
----add variables to transfer potential down to the patch level: AMRLevelPluto -> LevelPluto -> PatchEuler
+-add variables to transfer potential down to the patch level: AMRLevelPluto -> LevelPluto -> PatchEuler
 
 ### Additional changes necessary to the base PLUTO code:
 
 In Src/struct.h: the data structure needs to make room for Phi
+
+In Src/pluto.h: define the SELFGRAV variable for simple on/off switch
+
+In Src/initialize.c: Allocate array for Phi in the main data structure
 
 In Src/Chombo/PatchEuler.cpp: need to allocate the memory for the space in the data structure for Phi
 
@@ -40,12 +44,12 @@ In Src/Time_Stepping/update_stage.c: modify the calls of the above functions to 
 
 ## TODO:
 
--Make potential available to level integrator on refined levels
++Make potential available to level integrator on refined levels
 
--Resolve memory leak
++Resolve memory leak
 
--More sophisticated boundary conditions
++More sophisticated boundary conditions
 
--Additional refinement criteria
++Additional refinement criteria
 
 -Hans Baehr
