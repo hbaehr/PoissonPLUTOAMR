@@ -234,12 +234,18 @@ Real AMRLevelPluto::advance()
 
   // ***** This is where the self-gravity solver begins *****
   #if SELFGRAV
-  // Solve for potential only on the coarsest level, l = 0
+  pout() << "Starting SELFGRAV" << endl;
+  pout() << "Current level: " << m_level << endl;
+  int statusphi = m_phi.size();
+  pout() << "Status m_phi: " << statusphi << endl;
+   // Solve for potential only on the coarsest level, l = 0
    if (!m_hasCoarser)
      {
        // Get level hierarchy
        Vector<AMRLevel*> onTheLev = AMRLevel::getAMRLevelHierarchy();
        int numLevels = onTheLev.size();
+
+       pout() << "Number of levels: " << numLevels << endl;
 
        // Create Vector containers for the multilevel input to the solvers and ensure m_phi is large enough
        m_phi.resize(numLevels, NULL);
@@ -281,6 +287,7 @@ Real AMRLevelPluto::advance()
          {
            delete rhs[lev];
            //delete temp_rhs[lev]
+	   pout() << "Deleting okay" << endl;
          }
      }
 
@@ -298,6 +305,7 @@ Real AMRLevelPluto::advance()
         for (int lev=0; lev<m_level; lev++)
           {
             AMRLevelPluto* zeroLevel = (AMRLevelPluto*)(onTheLev[0]);
+	    m_phi[lev]               = new LevelData<FArrayBox>;
             m_phi[lev]               = zeroLevel->m_phi[lev]; // <---- This is where I believe the problem is
           }
      }
@@ -346,6 +354,14 @@ Real AMRLevelPluto::advance()
   #if (COOLING != NO)
    newDt = Min(newDt,DtCool);
   #endif
+#endif
+
+#if SELFGRAV
+   for (int lev=0; lev<m_level; lev++)
+     {
+       delete m_phi[m_level];
+     }
+   pout() << "Advance and deletion okay" << endl;
 #endif
 
   m_time += m_dt;                  // Update m_time
