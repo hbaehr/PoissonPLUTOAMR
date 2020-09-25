@@ -54,16 +54,16 @@ public:
   /// Destructor
   /**
   */
-  ~AMRPoissonPluto();
+  virtual ~AMRPoissonPluto();
 
   /// Define the parameters the object needs
   /**
   */
   virtual void define(Vector<LevelData<FArrayBox>* >    a_rhs,
-                      Vector<DisjointBoxLayout>&        a_allGrids,
-                      Vector<ProblemDomain>&            a_domain,
-                      Vector<Real>&                     a_dx,
-                      Vector<int>&                      a_ref_ratio
+                      Vector<DisjointBoxLayout>         a_allGrids,
+                      Vector<ProblemDomain>             a_domain,
+                      Vector<Real>                      a_dx,
+                      Vector<int>                       a_ref_ratio,
                       int                               a_numLevels);
 
   /*extern void convDiriBC_RBGS( FArrayBox&              a_state,
@@ -96,21 +96,29 @@ public:
                            Vector<Real>&                              a_dx,
                            int                                        a_level);
 
-  virtual void runSolver();
+  virtual Vector<LevelData<FArrayBox>* > runSolver();
 
   Vector<LevelData<FArrayBox>* > phi;
 
+  Vector<LevelData<FArrayBox>* > m_phi;
+
 protected:
 
-  Vector<ProblemDomain>& m_domain;
+  Vector<ProblemDomain> m_domain;
 
   int m_numLevels;
 
-  Vector<Real>& m_dx;
+  Vector<Real> m_dx;
 
-  Vector<int>& m_ref_ratio;
+  Vector<int> m_ref_ratio;
 
-  Vector<DisjointBoxLayout>& m_grids;
+  Vector<DisjointBoxLayout> m_grids;
 
   Vector<LevelData<FArrayBox>* > m_rhs;
+
+  bool m_isDefined;
+
+  int maxLevels;
+
+  int numLevels;
 };

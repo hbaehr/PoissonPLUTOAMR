@@ -38,6 +38,7 @@
 #include "BiCGStabSolver.H"
 #include "CONSTANTS.H"
 
+#include "AMRPoissonPluto.H"
 #include "AMRPoissonOp.H"
 #include "AMRMultiGrid.H"
 
