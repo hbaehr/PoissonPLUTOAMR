@@ -386,7 +386,7 @@ Vector<LevelData<FArrayBox>* > AMRPoissonPluto::runSolver()
    //int s_verbosity = 4;
 
    // allocate solution and RHS, initialize RHS
-   int numLevels = grids.size();
+   int numLevels = m_grids.size();
    Vector<LevelData<FArrayBox>* > phi(numLevels, NULL);
    //Vector<LevelData<FArrayBox>* > rhs(numLevels, NULL);
    // this is for convenience
@@ -442,7 +442,7 @@ Vector<LevelData<FArrayBox>* > AMRPoissonPluto::runSolver()
 
        for (int lev=0; lev<numLevels; lev++)
          {
-           plotData[lev] = new LevelData<FArrayBox>(amrGrids[lev],
+           plotData[lev] = new LevelData<FArrayBox>(m_grids[lev],
                                                     3, IntVect::Zero);
 
            Interval phiInterval(0,0);
